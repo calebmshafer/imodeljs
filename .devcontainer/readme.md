@@ -1,43 +1,29 @@
 # Build & Test in a Linux Container on Windows
 
-## Bootstrap
-
-Ensure both Containers and Hyper-V are enabled in Windows.
-
-- Open the Start Menu and starting typing "Turn Windows features on or off" to select it
-- Ensure both 'Containers' and all of 'Hyper-V' are enabled.
-  - [Hyper-V MS Docs](https://docs.microsoft.com/virtualization/hyper-v-on-windows/quick-start/enable-hyper-v)
-  - [Container MS Docs](https://docs.microsoft.com/virtualization/windowscontainers/quick-start/quick-start-windows-10-linux)
-  - Hyper-V requires that virtualization is enabled in your BIOS. Every BIOS is different, so use Google or ask around if you encounter related errors.
-
-Install [Docker CE](https://hub.docker.com/editions/community/docker-ce-desktop-windows) ([direct](https://download.docker.com/win/stable/Docker%20for%20Windows%20Installer.exe)). Keep all defaults. Tested with version 2.0.0.3 (engine 18.09.2); newer versions should likely work as well.
-
-Customize Docker settings (in task bar notification area, right-click the Docker icon and select 'Settings').
-
-- Shared Drives: You must share the drive(s) that contain your source code **and** your home drive.
-- Advanced: Building is resource-intensive; we recommend at least 4 vCPUs and 4 GB of RAM.
-
-Update VS Code to at least 1.35.0 (May 2019).
-
-Install/update VS Code extension "Remote - Containers".
+The iModel.js repository provides this configuration for quickly getting a development environment setup for working the iModel.js source in an isolated Linux container.  This can be used with VS Code locally and in the future [GitHub Codespaces](https://github.com/features/codespaces).
 
 ## How to use the container
 
-Open your iModel.js repo in VS Code, click the green area in the status bar, and select VS Code command 'Remote-Containers: Reopen Folder in Container'. Once connected, the green section of the status bar should say something like "Dev Container: imodeljs-linux".
+1. Install Docker Desktop or Docker for Linux on your local machine. (See [docs](https://aka.ms/vscode-remote/containers/getting-started) for additional details.)
 
-The *first time* you "open" the container, you must clone the source code into the working directory, e.g. in VS Code's Terminal, `git clone URL /workspace/imodeljs`. If you use a custom NPM package source, you must also configure that (e.g. `npm config set ...`).
+1. Increase Docker settings if possible. We recommend at least 4 vCPUs and 4 GB of RAM (8 GB recommended)
+    > **Note:** The [Resource Monitor](https://marketplace.visualstudio.com/items?itemName=mutantdino.resourcemonitor) extension is included in the container so you can keep an eye on CPU/Memory in the status bar.
 
-As with any copy of the code, you must build iModel.js inside the container. Use VS Code's Terminal to perform normal build commands such as `rush install`, `rush rebuild`, and `rush test`. You should also have access to the same launch profiles in VS Code for debugging.
+1. Install/update VS Code extension [Remote - Containers](https://aka.ms/vscode-remote/download/containers).
+
+1. Press <kbd>Ctrl/Cmd</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd> and select **Remote-Containers: Clone Repository in Container Volume...**.
+
+    > For performance reasons (e.g. 10x), we do **not** recommend mount/share source code with the host computer and the container. When VS Code is "connected" to the container, all file operations you perform in the GUI are done in the *container*, not the host. At this time, the best way to share changes with the host is to create a Git branch, and push/pull both sides to keep them in sync.
+
+1. Type `https://github.com/imodeljs/imodeljs` (or a branch or PR URL) in the input box and press <kbd>Enter</kbd>.
+
+1. After the container is running, use VS Code's Terminal to perform normal build commands such as `rush install`, `rush rebuild`, and `rush test`. You should also have access to the same launch profiles in VS Code for debugging.
 
 When you are done, click the green area in the status bar, and select 'Remote-Containers: Reopen Folder Locally' to switch back to a local view on your host.
 
 ### Notes
 
-For performance reasons (e.g. 10x), we do **not** mount / share source code with the host computer and the container. The container must maintain its own unique copy of the source (and dependencies and output etc.). When VS Code is "connected" to the container, all file operations you perform in the GUI are done in the *container*, not the host. At this time, the best way to share changes with the host is to create a Git branch, and push/pull both sides to keep them in sync.
-
 VS Code injects Git authorization tokens into the container, so you can fetch/pull/push as you would otherwise do on the host. VS Code also mounts your .gitconfig file from the host in the container, so your configured name/email/aliases etc. are available in the container.
-
-The first time you "open" a container for a project, it will be built and persisted on your host computer. When first built, there is no source code in the container. However, after you've cloned the first time, the container should retain the source until you either tell VS Code to rebuild the container, or you tell docker to delete it. Source is expected to be cloned to /workspace/imodeljs; once you use VS Code's Terminal to clone, VS Code should automatically see the workspace.
 
 ### Terminal
 

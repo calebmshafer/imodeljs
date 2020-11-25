@@ -1,3 +1,7 @@
+---
+ignore: true
+---
+
 # Tips and Guidelines for iModel.js
 
 * [TypeScript Coding Guideline](./typescript-coding-guidelines.md)

@@ -2,7 +2,7 @@
 
 Writing an iModel.js application requires the following software:
 
-- [Node.js](https://nodejs.org) (latest 10.x or 12.x LTS version)
+- [Node.js](https://nodejs.org) (latest 12.x LTS version)
   - This provides the backend JavaScript runtime.
   - The installation also includes the `npm` command line tool.
 - [Google Chrome](https://www.google.com/chrome/)
@@ -18,10 +18,9 @@ The following tools are very helpful and highly suggested for working with iMode
   - This is the recommended editor and debugger for iModel.js applications.
   - VS Code also supplies a graphical user interface for working with Git.
   - The following VS Code extensions can also be quite helpful:
-    - [TSLint](https://marketplace.visualstudio.com/items?itemName=ms-vscode.vscode-typescript-tslint-plugin) (use tslint.json from @bentley/build-tools to enforce Bentley coding standards)
+    - [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) (use teh @bentley/eslint-plugin to enforce the iModel.js coding standards)
     - [Debugger for Chrome](https://marketplace.visualstudio.com/items?itemName=msjsdiag.debugger-for-chrome)
     - [GitLens](https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens) (great tools for using Git inside VS Code)
-    - [MarkdownLint](https://marketplace.visualstudio.com/items?itemName=DavidAnson.vscode-markdownlint) (for editing documentation)
 
 ### Recommended reading
 

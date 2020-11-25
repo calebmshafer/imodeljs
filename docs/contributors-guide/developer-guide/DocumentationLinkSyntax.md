@@ -1,3 +1,7 @@
+---
+ignore: true
+---
+
 # iModel.js Documentation Linking Syntax
 
 The documentation for the iModel.js website is authored from two sources:

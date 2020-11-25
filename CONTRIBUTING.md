@@ -66,30 +66,5 @@ You may be asked to clarify things or try different approaches, so please follow
 ## Contributions
 
 We'd love to accept your contributions to iModel.js.
-There are just a few guidelines you need to follow.
 
-### Contributor License Agreement (CLA)
-
-You must sign a [Contribution License Agreement with Bentley](Bentley-CLA.pdf) before your contributions will be accepted.
-This a one-time requirement for Bentley projects in GitHub.
-You can read more about [Contributor License Agreements](https://en.wikipedia.org/wiki/Contributor_License_Agreement) on Wikipedia.
-
-> Note: a CLA is not required if the change is trivial (such as fixing a spelling error or a typo).
-
-### Pull Requests
-
-All submissions go through a review process.
-We use GitHub pull requests for this purpose.
-Consult [GitHub Help](https://help.github.com/articles/about-pull-requests/) for more information on using pull requests.
-
-### Types of Contributions
-
-We welcome contributions, large or small, including:
-
-* Bug fixes
-* New features
-* Documentation corrections or additions
-* Example code snippets
-* Sample data
-
-Thank you for taking the time to contribute to open source and making great projects like iModel.js possible!
+Head over to our [contributors guide](./docs/contributors-guide/README.md) to learn more!
