@@ -16,9 +16,10 @@ import { DisplayLabelRequestOptions } from '@bentley/presentation-common';
 import { DisplayLabelsRequestOptions } from '@bentley/presentation-common';
 import { DisplayValueGroup } from '@bentley/presentation-common';
 import { DistinctValuesRequestOptions } from '@bentley/presentation-common';
-import { EventSink } from '@bentley/imodeljs-backend';
 import { ExtendedContentRequestOptions } from '@bentley/presentation-common';
 import { ExtendedHierarchyRequestOptions } from '@bentley/presentation-common';
+import { FormatProps } from '@bentley/imodeljs-quantity';
+import { HierarchyCompareInfo } from '@bentley/presentation-common';
 import { HierarchyRequestOptions } from '@bentley/presentation-common';
 import { Id64String } from '@bentley/bentleyjs-core';
 import { IDisposable } from '@bentley/bentleyjs-core';
@@ -109,6 +110,7 @@ export class Presentation {
 
 // @beta
 export enum PresentationBackendLoggerCategory {
+    Ipc = "presentation-backend.Ipc",
     // (undocumented)
     Package = "presentation-backend",
     PresentationManager = "presentation-backend.PresentationManager",
@@ -129,6 +131,8 @@ export enum PresentationBackendNativeLoggerCategory {
     ECPresentation = "ECPresentation",
     // (undocumented)
     ECPresentation_Connections = "ECPresentation.Connections",
+    // (undocumented)
+    ECPresentation_Localization = "ECPresentation.Localization",
     // (undocumented)
     ECPresentation_RulesEngine = "ECPresentation.RulesEngine",
     // (undocumented)
@@ -155,7 +159,7 @@ export class PresentationManager {
     // @deprecated (undocumented)
     compareHierarchies(requestContext: ClientRequestContext, requestOptions: PresentationDataCompareOptions<IModelDb, NodeKey>): Promise<PartialHierarchyModification[]>;
     // @beta
-    compareHierarchies(requestOptions: WithClientRequestContext<PresentationDataCompareOptions<IModelDb, NodeKey>>): Promise<PartialHierarchyModification[]>;
+    compareHierarchies(requestOptions: WithClientRequestContext<PresentationDataCompareOptions<IModelDb, NodeKey>>): Promise<HierarchyCompareInfo>;
     // @deprecated
     computeSelection(requestContext: ClientRequestContext, requestOptions: SelectionScopeRequestOptions<IModelDb>, ids: Id64String[], scopeId: string): Promise<KeySet>;
     // @beta
@@ -250,9 +254,13 @@ export interface PresentationManagerProps {
     addon?: NativePlatformDefinition;
     // @beta
     cacheConfig?: HierarchyCacheConfig;
+    // @alpha (undocumented)
+    contentCacheSize?: number;
+    // @alpha
+    defaultFormats?: {
+        [phenomenon: string]: UnitSystemFormat;
+    };
     enableSchemasPreload?: boolean;
-    // @internal (undocumented)
-    eventSink?: EventSink;
     // @internal
     id?: string;
     localeDirectories?: string[];
@@ -268,6 +276,8 @@ export interface PresentationManagerProps {
     };
     // @alpha
     updatesPollInterval?: number;
+    // @alpha
+    useMmap?: boolean | number;
 }
 
 // @public

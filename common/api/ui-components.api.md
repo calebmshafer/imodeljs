@@ -17,7 +17,6 @@ import { CommonToolbarItem } from '@bentley/ui-abstract';
 import { ConnectDragPreview } from 'react-dnd';
 import { ConnectDragSource } from 'react-dnd';
 import { ConnectDropTarget } from 'react-dnd';
-import { ContextComponent } from 'react-dnd';
 import * as CSS from 'csstype';
 import { CSSProperties } from 'react';
 import { CustomButtonDefinition } from '@bentley/ui-abstract';
@@ -25,6 +24,8 @@ import { DateFormatter } from '@bentley/ui-abstract';
 import { DndComponentClass } from 'react-dnd';
 import { EnumerationChoice } from '@bentley/ui-abstract';
 import { Face } from '@bentley/ui-core';
+import { FormatProps } from '@bentley/imodeljs-quantity';
+import { FormatterSpec } from '@bentley/imodeljs-quantity';
 import { GenericUiEventArgs } from '@bentley/ui-abstract';
 import { GlobalContextMenuProps } from '@bentley/ui-core';
 import { GlobalDialogProps } from '@bentley/ui-core';
@@ -38,6 +39,7 @@ import { IDisposable } from '@bentley/bentleyjs-core';
 import { immerable } from 'immer';
 import { IModelConnection } from '@bentley/imodeljs-frontend';
 import * as Inspire from 'inspire-tree';
+import { LinkElementsInfo } from '@bentley/ui-abstract';
 import { Matrix3d } from '@bentley/geometry-core';
 import { NoChildrenProps } from '@bentley/ui-core';
 import { NodeCheckboxProps as NodeCheckboxProps_2 } from '@bentley/ui-core';
@@ -58,7 +60,7 @@ import { PropertyDescription } from '@bentley/ui-abstract';
 import { PropertyRecord } from '@bentley/ui-abstract';
 import { PropertyValue } from '@bentley/ui-abstract';
 import * as PropTypes from 'prop-types';
-import { QuantityType } from '@bentley/imodeljs-frontend';
+import { QuantityTypeArg } from '@bentley/imodeljs-frontend';
 import { RatioChangeResult } from '@bentley/ui-core';
 import * as React from 'react';
 import ReactDataGrid = require('react-data-grid');
@@ -71,6 +73,8 @@ import { TimeDisplay } from '@bentley/ui-abstract';
 import { TimeFormat } from '@bentley/ui-core';
 import { UiEvent } from '@bentley/ui-core';
 import { UiSettings } from '@bentley/ui-core';
+import { UnitProps } from '@bentley/imodeljs-quantity';
+import { UnitsProvider } from '@bentley/imodeljs-quantity';
 import { Vector3d } from '@bentley/geometry-core';
 import { ViewManager } from '@bentley/imodeljs-frontend';
 import { Viewport } from '@bentley/imodeljs-frontend';
@@ -209,19 +213,23 @@ export class BaseSolarDataProvider implements SolarDataProvider {
     animationFraction: number;
     // (undocumented)
     protected _cartographicCenter: Cartographic;
-    // (undocumented)
     get day(): Date;
-    set day(dayVal: Date);
-    // (undocumented)
     get dayStartMs(): number;
     // (undocumented)
     getCartographicCenter(iModel: IModelConnection): Cartographic;
+    // (undocumented)
+    protected getZone(location: Cartographic): number;
+    // (undocumented)
+    protected initializeData(projectTimeZoneOffset: number, initialTime?: Date): void;
     // (undocumented)
     latitude: number;
     // (undocumented)
     longitude: number;
     // (undocumented)
     onTimeChanged: (_time: Date) => void;
+    // (undocumented)
+    protected _projectTimeZoneOffset: number;
+    setDateAndTime(date: Date, isProjectDate?: boolean): void;
     // (undocumented)
     get shadowColor(): ColorDef;
     set shadowColor(color: ColorDef);
@@ -232,11 +240,16 @@ export class BaseSolarDataProvider implements SolarDataProvider {
     // (undocumented)
     get sunrise(): Date;
     // (undocumented)
+    get sunriseMs(): number;
+    // (undocumented)
     get sunset(): Date;
     // (undocumented)
-    supportsTimelineAnimation: boolean;
+    get sunsetMs(): number;
     // (undocumented)
-    timeOfDay: Date;
+    supportsTimelineAnimation: boolean;
+    get timeOfDay(): Date;
+    // (undocumented)
+    get timeZoneOffset(): number;
     // (undocumented)
     viewId: string;
     set viewport(viewport: ScreenViewport | undefined);
@@ -244,7 +257,7 @@ export class BaseSolarDataProvider implements SolarDataProvider {
     get viewport(): ScreenViewport | undefined;
     // (undocumented)
     protected _viewport: ScreenViewport | undefined;
-}
+    }
 
 // @alpha
 export class BaseTimelineDataProvider implements TimelineDataProvider {
@@ -298,14 +311,10 @@ export class BasicPropertyEditor extends PropertyEditorBase {
     get reactNode(): React.ReactNode;
 }
 
-// @beta
-export const BeDragDropContext: typeof BeDragDropContextComponent & ContextComponent<any>;
-
-// @beta
-export class BeDragDropContextComponent extends React.PureComponent {
-    // (undocumented)
-    render(): React.ReactNode;
-}
+// @beta @deprecated
+export function BeDragDropContext(props: {
+    children?: React.ReactNode;
+}): JSX.Element;
 
 // @public @deprecated
 export class BeInspireTree<TNodePayload> {
@@ -507,6 +516,10 @@ export class BooleanEditor extends React.PureComponent<PropertyEditorProps, Bool
     componentWillUnmount(): void;
     // (undocumented)
     getPropertyValue(): Promise<PropertyValue | undefined>;
+    // (undocumented)
+    get hasFocus(): boolean;
+    // (undocumented)
+    get htmlElement(): HTMLElement | null;
     // @internal (undocumented)
     render(): JSX.Element;
     // @internal (undocumented)
@@ -577,7 +590,7 @@ export class BreadcrumbDetails extends React.Component<BreadcrumbDetailsProps, B
     readonly state: BreadcrumbDetailsState;
     }
 
-// @beta
+// @beta @deprecated
 export interface BreadcrumbDetailsDragDropProps<DragDropObject = any> {
     // (undocumented)
     dragProps?: DragSourceProps<DragDropObject>;
@@ -585,7 +598,7 @@ export interface BreadcrumbDetailsDragDropProps<DragDropObject = any> {
     dropProps?: DropTargetProps<DragDropObject>;
 }
 
-// @beta
+// @beta @deprecated
 export type BreadcrumbDetailsDragDropType = {} | TreeNodeItem | TableDataProvider;
 
 // @beta
@@ -601,7 +614,7 @@ export interface BreadcrumbDetailsProps extends CommonProps {
     renderTable?: (props: TableProps, node: TreeNodeItem | undefined, children: TreeNodeItem[]) => React.ReactNode;
 }
 
-// @beta
+// @beta @deprecated
 export interface BreadcrumbDragDropProps<DragDropObject = any> {
     // (undocumented)
     dragProps?: DragSourceProps<DragDropObject>;
@@ -831,6 +844,10 @@ export class ColorEditor extends React.PureComponent<PropertyEditorProps, ColorE
     componentDidUpdate(prevProps: PropertyEditorProps): void;
     // (undocumented)
     getPropertyValue(): Promise<PropertyValue | undefined>;
+    // (undocumented)
+    get hasFocus(): boolean;
+    // (undocumented)
+    get htmlElement(): HTMLElement | null;
     // @internal (undocumented)
     render(): JSX.Element;
     // @internal (undocumented)
@@ -838,7 +855,7 @@ export class ColorEditor extends React.PureComponent<PropertyEditorProps, ColorE
 }
 
 // @beta
-export const ColorPickerButton: React.ForwardRefExoticComponent<ColorPickerProps & React.RefAttributes<HTMLButtonElement>>;
+export const ColorPickerButton: (props: ColorPickerProps) => JSX.Element | null;
 
 // @beta
 export function ColorPickerDialog({ dialogTitle, color, onOkResult, onCancelResult, colorPresets }: ColorPickerDialogProps): JSX.Element;
@@ -871,16 +888,20 @@ export interface ColorPickerPanelProps {
 }
 
 // @beta
-export const ColorPickerPopup: React.ForwardRefExoticComponent<ColorPickerPopupProps & React.RefAttributes<HTMLButtonElement>>;
+export const ColorPickerPopup: (props: ColorPickerPopupProps) => JSX.Element | null;
 
 // @beta
 export interface ColorPickerPopupProps extends React.ButtonHTMLAttributes<HTMLButtonElement>, CommonProps {
+    captureClicks?: boolean;
     colorDefs?: ColorDef[];
     disabled?: boolean;
     initialColor: ColorDef;
+    onClose?: ((colorValue: ColorDef) => void) | undefined;
     onColorChange?: ((newColor: ColorDef) => void) | undefined;
     popupPosition?: RelativePosition;
     readonly?: boolean;
+    ref?: React.Ref<HTMLButtonElement>;
+    showCaret?: boolean;
 }
 
 // @beta
@@ -892,7 +913,9 @@ export interface ColorPickerProps extends React.ButtonHTMLAttributes<HTMLButtonE
     numColumns?: number;
     onColorPick?: ((color: ColorDef) => void) | undefined;
     readonly?: boolean;
+    ref?: React.Ref<HTMLButtonElement>;
     round?: boolean;
+    showCaret?: boolean;
 }
 
 // @beta
@@ -959,7 +982,7 @@ export interface CommonPropertyGridProps extends CommonProps {
     onPropertyContextMenu?: (args: PropertyGridContextMenuArgs) => void;
     // @beta
     onPropertyEditing?: (args: PropertyEditingArgs, category: PropertyCategory) => void;
-    // @beta
+    // @beta @deprecated
     onPropertyLinkClick?: (property: PropertyRecord, text: string) => void;
     onPropertySelectionChanged?: (property: PropertyRecord) => void;
     // @beta
@@ -998,7 +1021,7 @@ export interface CompositeFilterDescriptorCollection {
     logicalOperator: FilterCompositionLogicalOperator;
 }
 
-// @alpha
+// @beta
 export enum CompositeFilterType {
     // (undocumented)
     And = 0,
@@ -1010,9 +1033,11 @@ export enum CompositeFilterType {
 export class CompositePropertyDataFilterer extends PropertyDataFiltererBase {
     constructor(_leftFilterer: IPropertyDataFilterer, _operator: CompositeFilterType, _rightFilterer: IPropertyDataFilterer);
     // (undocumented)
+    categoryMatchesFilter(node: PropertyCategory, parents: PropertyCategory[]): Promise<PropertyDataFilterResult>;
+    // (undocumented)
     get isActive(): boolean;
     // (undocumented)
-    matchesFilter(node: PropertyRecord, parents: PropertyRecord[]): Promise<PropertyDataFilterResult>;
+    recordMatchesFilter(node: PropertyRecord, parents: PropertyRecord[]): Promise<PropertyDataFilterResult>;
     }
 
 // @public
@@ -1092,6 +1117,9 @@ export namespace ConvertedPrimitives {
     export type Value = boolean | number | string | Date | Point | Id64String;
 }
 
+// @internal
+export function convertPrimitiveRecordToString(record: PropertyRecord): string | Promise<string>;
+
 // @internal (undocumented)
 export enum CubeHover {
     // (undocumented)
@@ -1156,6 +1184,10 @@ export class CustomNumberEditor extends React.PureComponent<PropertyEditorProps,
     componentWillUnmount(): void;
     // (undocumented)
     getPropertyValue(): Promise<PropertyValue | undefined>;
+    // (undocumented)
+    get hasFocus(): boolean;
+    // (undocumented)
+    get htmlElement(): HTMLElement | null;
     // @internal (undocumented)
     render(): React.ReactNode;
     // @internal (undocumented)
@@ -1164,6 +1196,8 @@ export class CustomNumberEditor extends React.PureComponent<PropertyEditorProps,
 
 // @alpha
 export class CustomNumberPropertyEditor extends PropertyEditorBase {
+    // (undocumented)
+    get containerHandlesEscape(): boolean;
     // (undocumented)
     get reactNode(): React.ReactNode;
 }
@@ -1248,6 +1282,10 @@ export class DateTimeEditor extends React.PureComponent<DateTimeEditorProps, Dat
     // (undocumented)
     getPropertyValue(): Promise<PropertyValue | undefined>;
     // (undocumented)
+    get hasFocus(): boolean;
+    // (undocumented)
+    get htmlElement(): HTMLElement | null;
+    // (undocumented)
     processDateChange(typeConverter: TypeConverter, newValue: Date): Promise<void>;
     // (undocumented)
     render(): React.ReactNode;
@@ -1305,6 +1343,9 @@ export abstract class DateTimeTypeConverterBase extends TypeConverter implements
     // (undocumented)
     sortCompare(valueA: Date, valueB: Date, _ignoreCase?: boolean): number;
 }
+
+// @beta
+export const DEFAULT_LINKS_HANDLER: LinkElementsInfo;
 
 // @public
 export interface DelayLoadedTreeNodeItem extends TreeNodeItem {
@@ -1374,7 +1415,7 @@ export class DirectionHelpers {
 }
 
 // @alpha
-export class DisplayValuePropertyDataFilterer extends PropertyDataFiltererBase {
+export class DisplayValuePropertyDataFilterer extends PropertyRecordDataFiltererBase {
     constructor(filterText?: string);
     // (undocumented)
     get filterText(): string;
@@ -1382,7 +1423,7 @@ export class DisplayValuePropertyDataFilterer extends PropertyDataFiltererBase {
     // (undocumented)
     get isActive(): boolean;
     // (undocumented)
-    matchesFilter(node: PropertyRecord): Promise<PropertyDataFilterResult>;
+    recordMatchesFilter(node: PropertyRecord): Promise<PropertyDataFilterResult>;
 }
 
 // @beta
@@ -1419,7 +1460,7 @@ export class DragAction<Item> {
     };
 }
 
-// @beta
+// @beta @deprecated
 export interface DragDropArguments<DragDropObject = any> {
     clientOffset: {
         x: number;
@@ -1447,20 +1488,20 @@ export interface DragDropArguments<DragDropObject = any> {
     };
 }
 
-// @beta
+// @beta @deprecated
 export interface DragLayerProps<DragDropObject = any> extends CommonProps {
     // (undocumented)
     args?: DragSourceArguments<DragDropObject>;
 }
 
-// @beta
+// @beta @deprecated
 export interface DragSourceArguments<DragDropObject = any> extends DragDropArguments<DragDropObject> {
     // (undocumented)
     defaultDragLayer?: React.ComponentType<DragLayerProps<DragDropObject>>;
     parentObject?: DragDropObject;
 }
 
-// @beta
+// @beta @deprecated
 export interface DragSourceProps<DragDropObject = any> {
     defaultDragLayer?: React.ComponentType<DragLayerProps<DragDropObject>>;
     objectType?: ((data?: DragDropObject) => string | symbol) | string | symbol;
@@ -1561,7 +1602,7 @@ export interface DrawingViewportChangeEventArgs {
     rotation: Matrix3d;
 }
 
-// @beta
+// @beta @deprecated
 export enum DropEffects {
     // (undocumented)
     Copy = 1,
@@ -1573,7 +1614,7 @@ export enum DropEffects {
     None = 0
 }
 
-// @beta
+// @beta @deprecated
 export enum DropStatus {
     // (undocumented)
     Cancel = 3,
@@ -1585,12 +1626,12 @@ export enum DropStatus {
     Ok = 1
 }
 
-// @beta
+// @beta @deprecated
 export interface DropTargetArguments<DragDropObject = any> extends DragSourceArguments<DragDropObject> {
     dropLocation?: DragDropObject;
 }
 
-// @beta
+// @beta @deprecated
 export interface DropTargetProps<DragDropObject = any> {
     canDropTargetDrop?: (args: DropTargetArguments<DragDropObject>) => boolean;
     objectTypes?: Array<string | symbol> | (() => Array<string | symbol>);
@@ -1641,6 +1682,10 @@ export class EnumButtonGroupEditor extends React.Component<PropertyEditorProps, 
     componentDidUpdate(prevProps: PropertyEditorProps): void;
     // (undocumented)
     getPropertyValue(): Promise<PropertyValue | undefined>;
+    // (undocumented)
+    get hasFocus(): boolean;
+    // (undocumented)
+    get htmlElement(): HTMLElement | null;
     // @internal (undocumented)
     render(): JSX.Element;
     // @internal (undocumented)
@@ -1657,6 +1702,10 @@ export class EnumEditor extends React.PureComponent<PropertyEditorProps, EnumEdi
     componentWillUnmount(): void;
     // (undocumented)
     getPropertyValue(): Promise<PropertyValue | undefined>;
+    // (undocumented)
+    get hasFocus(): boolean;
+    // (undocumented)
+    get htmlElement(): HTMLElement | null;
     // @internal (undocumented)
     render(): JSX.Element;
     // @internal (undocumented)
@@ -1699,7 +1748,7 @@ export interface ErrorObserver<T> {
 
 // @public @deprecated
 export class EventsMuteContext implements IDisposable {
-    constructor(_events: BeInspireTreeEvent[], _mute: (events: BeInspireTreeEvent[]) => void, _unmute: (events: BeInspireTreeEvent[]) => boolean, _emit?: ((events: BeInspireTreeEvent[]) => void) | undefined, _listen?: ((events: BeInspireTreeEvent[], listener: (...values: any[]) => void) => () => void) | undefined, allowedEventTriggersBeforeMute?: number);
+    constructor(_events: BeInspireTreeEvent[], _mute: (events: BeInspireTreeEvent[]) => void, _unmute: (events: BeInspireTreeEvent[]) => boolean, _emit?: ((events: BeInspireTreeEvent[]) => void) | undefined, _listen?: ((events: BeInspireTreeEvent[], listener: (...values: any[]) => void) => (() => void)) | undefined, allowedEventTriggersBeforeMute?: number);
     // (undocumented)
     dispose(): void;
     }
@@ -1821,12 +1870,24 @@ export abstract class FilterDescriptorCollectionBase<TDescriptor extends FilterD
     remove(item: TDescriptor): boolean;
 }
 
-// @alpha
+// @beta
 export interface FilteredPropertyData extends PropertyData {
     // (undocumented)
-    getMatchByIndex?: (index: number) => PropertyRecordMatchInfo | undefined;
+    filteredTypes?: FilteredType[];
+    // (undocumented)
+    getMatchByIndex?: (index: number) => HighlightInfo | undefined;
     // (undocumented)
     matchesCount?: number;
+}
+
+// @beta
+export enum FilteredType {
+    // (undocumented)
+    Category = 0,
+    // (undocumented)
+    Label = 1,
+    // (undocumented)
+    Value = 2
 }
 
 // @public
@@ -1971,8 +2032,99 @@ export class FloatTypeConverter extends NumericTypeConverterBase {
 // @internal
 export function formatInputDate(inputDate: Date, timeDisplay?: TimeDisplay, customFormatter?: DateFormatter, alternateDateFormat?: AlternateDateFormats): string | undefined;
 
+// @alpha
+export function FormatPanel(props: FormatPanelProps): JSX.Element;
+
+// @alpha
+export interface FormatPanelProps extends CommonProps {
+    // (undocumented)
+    enableMinimumProperties?: boolean;
+    // (undocumented)
+    initialFormat: FormatProps;
+    // (undocumented)
+    initialMagnitude?: number;
+    // (undocumented)
+    onFormatChange?: (format: FormatProps) => void;
+    // (undocumented)
+    persistenceUnit: Promise<UnitProps> | UnitProps;
+    // (undocumented)
+    provideFormatSpec?: (formatProps: FormatProps, persistenceUnit: UnitProps, unitsProvider: UnitsProvider) => Promise<FormatterSpec>;
+    // (undocumented)
+    providePrimaryChildren?: (formatProps: FormatProps, fireFormatChange: (newProps: FormatProps) => void) => React.ReactNode;
+    // (undocumented)
+    provideSecondaryChildren?: (formatProps: FormatProps, fireFormatChange: (newProps: FormatProps) => void) => React.ReactNode;
+    // (undocumented)
+    showSample?: boolean;
+    // (undocumented)
+    unitsProvider: UnitsProvider;
+}
+
+// @alpha
+export function FormatPrecision(props: FormatPrecisionProps): JSX.Element;
+
+// @alpha
+export interface FormatPrecisionProps extends CommonProps {
+    // (undocumented)
+    formatProps: FormatProps;
+    // (undocumented)
+    onChange?: (format: FormatProps) => void;
+}
+
+// @alpha
+export function FormatSample(props: FormatSampleProps): JSX.Element;
+
+// @alpha
+export interface FormatSampleProps extends CommonProps {
+    // (undocumented)
+    formatSpec?: FormatterSpec;
+    // (undocumented)
+    hideLabels?: boolean;
+    // (undocumented)
+    initialMagnitude?: number;
+}
+
+// @alpha
+export function FormatTypeOption(props: FormatTypeOptionProps): JSX.Element;
+
+// @alpha
+export interface FormatTypeOptionProps extends CommonProps {
+    // (undocumented)
+    formatProps: FormatProps;
+    // (undocumented)
+    onChange?: (format: FormatProps) => void;
+}
+
+// @alpha
+export function FormatUnitLabel(props: FormatUnitLabelProps): JSX.Element;
+
+// @alpha
+export interface FormatUnitLabelProps extends CommonProps {
+    // (undocumented)
+    formatProps: FormatProps;
+    // (undocumented)
+    onUnitLabelChange?: (format: FormatProps) => void;
+}
+
+// @alpha
+export function FormatUnits(props: FormatUnitsProps): JSX.Element;
+
+// @alpha
+export interface FormatUnitsProps extends CommonProps {
+    // (undocumented)
+    initialFormat: FormatProps;
+    // (undocumented)
+    onUnitsChange?: (format: FormatProps) => void;
+    // (undocumented)
+    persistenceUnit?: UnitProps;
+    // (undocumented)
+    unitsProvider: UnitsProvider;
+}
+
 // @public
 export function from<T>(iterable: Iterable<T> | PromiseLike<T>): Observable<T>;
+
+// @internal (undocumented)
+export function getCSSColorFromDef(colorDef: ColorDef): string;
 
 // @beta @deprecated
 export type GetCurrentlyEditedNode = () => BeInspireTreeNode<TreeNodeItem> | undefined;
@@ -2034,14 +2186,6 @@ export interface HighlightableTreeNodeProps {
 export interface HighlightableTreeProps {
     // (undocumented)
     activeMatch?: ActiveMatchInfo;
-    // (undocumented)
-    searchText: string;
-}
-
-// @beta
-export interface HighlightedRecordProps {
-    // (undocumented)
-    activeMatch?: PropertyRecordMatchInfo;
     // (undocumented)
     searchText: string;
 }
@@ -2118,6 +2262,10 @@ export class IconEditor extends React.PureComponent<PropertyEditorProps, IconEdi
     componentWillUnmount(): void;
     // (undocumented)
     getPropertyValue(): Promise<PropertyValue | undefined>;
+    // (undocumented)
+    get hasFocus(): boolean;
+    // (undocumented)
+    get htmlElement(): HTMLElement | null;
     // @internal (undocumented)
     render(): JSX.Element;
     }
@@ -2167,6 +2315,10 @@ export class ImageCheckBoxEditor extends React.PureComponent<PropertyEditorProps
     componentWillUnmount(): void;
     // (undocumented)
     getPropertyValue(): Promise<PropertyValue | undefined>;
+    // (undocumented)
+    get hasFocus(): boolean;
+    // (undocumented)
+    get htmlElement(): HTMLElement | null;
     // (undocumented)
     render(): JSX.Element;
     // @internal (undocumented)
@@ -2338,14 +2490,16 @@ export class IntTypeConverter extends NumericTypeConverterBase {
     convertToString(value?: Primitives.Int): string;
 }
 
-// @alpha
+// @beta
 export interface IPropertyDataFilterer {
+    // (undocumented)
+    categoryMatchesFilter: (node: PropertyCategory, parents: PropertyCategory[]) => Promise<PropertyDataFilterResult>;
     // (undocumented)
     readonly isActive: boolean;
     // (undocumented)
-    matchesFilter: (node: PropertyRecord, parents: PropertyRecord[]) => Promise<PropertyDataFilterResult>;
-    // (undocumented)
     onFilterChanged: PropertyFilterChangeEvent;
+    // (undocumented)
+    recordMatchesFilter: (node: PropertyRecord, parents: PropertyRecord[]) => Promise<PropertyDataFilterResult>;
 }
 
 // @public
@@ -2461,7 +2615,7 @@ export interface ITreeNodeLoaderWithProvider<TDataProvider extends TreeDataProvi
 }
 
 // @alpha
-export class LabelPropertyDataFilterer extends PropertyDataFiltererBase {
+export class LabelPropertyDataFilterer extends PropertyRecordDataFiltererBase {
     constructor(filterText?: string);
     // (undocumented)
     get filterText(): string;
@@ -2469,7 +2623,7 @@ export class LabelPropertyDataFilterer extends PropertyDataFiltererBase {
     // (undocumented)
     get isActive(): boolean;
     // (undocumented)
-    matchesFilter(node: PropertyRecord): Promise<PropertyDataFilterResult>;
+    recordMatchesFilter(node: PropertyRecord): Promise<PropertyDataFilterResult>;
 }
 
 // @public
@@ -2541,12 +2695,12 @@ export enum MapMode {
 export type MapPayloadToInspireNodeCallback<TPayload> = (payload: TPayload, remapper: MapPayloadToInspireNodeCallback<TPayload>) => BeInspireTreeNodeConfig;
 
 // @public
-export const matchLinks: (text: string) => {
+export const matchLinks: (text: string) => Array<{
     index: number;
     lastIndex: number;
     schema: string;
     url: string;
-}[];
+}>;
 
 // @internal
 export interface MenuItem {
@@ -2578,6 +2732,25 @@ export interface MilestoneRange {
     end: Date;
     // (undocumented)
     start: Date;
+}
+
+// @alpha
+export function MiscFormatOptions(props: MiscFormatOptionsProps): JSX.Element;
+
+// @alpha
+export interface MiscFormatOptionsProps extends CommonProps {
+    // (undocumented)
+    children?: React.ReactNode;
+    // (undocumented)
+    enableMinimumProperties?: boolean;
+    // (undocumented)
+    formatProps: FormatProps;
+    // (undocumented)
+    onChange?: (format: FormatProps) => void;
+    // (undocumented)
+    onShowHideOptions: (show: boolean) => void;
+    // (undocumented)
+    showOptions: boolean;
 }
 
 // @internal
@@ -2767,6 +2940,7 @@ export interface MutableTreeDataProvider extends ITreeDataProvider {
 export class MutableTreeModel implements TreeModel {
     // (undocumented)
     [immerable]: boolean;
+    changeNodeId(currentId: string, newId: string): boolean;
     clearChildren(parentId: string | undefined): void;
     computeVisibleNodes(): VisibleTreeNodes;
     getChildOffset(parentId: string | undefined, childId: string): number | undefined;
@@ -2777,9 +2951,10 @@ export class MutableTreeModel implements TreeModel {
     getRootNode(): TreeModelRootNode;
     insertChild(parentId: string | undefined, childNodeInput: TreeModelNodeInput, offset: number): void;
     iterateTreeModelNodes(parentId?: string): IterableIterator<MutableTreeModelNode>;
+    moveNode(sourceNodeId: string, targetParentId: string | undefined, targetIndex: number): boolean;
     removeChild(parentId: string | undefined, childId: string): void;
     setChildren(parentId: string | undefined, nodeInputs: TreeModelNodeInput[], offset: number): void;
-    setNumChildren(parentId: string | undefined, numChildren: number): void;
+    setNumChildren(parentId: string | undefined, numChildren: number | undefined): void;
     }
 
 // @beta
@@ -2828,9 +3003,9 @@ export interface NavCubeFaceProps extends React.AllHTMLAttributes<HTMLDivElement
 // @public
 export class NavigationPropertyTypeConverter extends TypeConverter {
     // (undocumented)
-    convertPropertyToString(propertyDescription: PropertyDescription, value?: Primitives.Hexadecimal): string;
+    convertPropertyToString(propertyDescription: PropertyDescription, value?: Primitives.Value): string;
     // (undocumented)
-    sortCompare(a: Primitives.Hexadecimal, b: Primitives.Hexadecimal, ignoreCase?: boolean): number;
+    sortCompare(a: Primitives.Value, b: Primitives.Value, ignoreCase?: boolean): number;
 }
 
 // @public
@@ -2929,6 +3104,10 @@ export class NumericInputEditor extends React.PureComponent<PropertyEditorProps,
     componentWillUnmount(): void;
     // (undocumented)
     getPropertyValue(): Promise<PropertyValue | undefined>;
+    // (undocumented)
+    get hasFocus(): boolean;
+    // (undocumented)
+    get htmlElement(): HTMLElement | null;
     // @internal (undocumented)
     render(): React.ReactNode;
     // @internal (undocumented)
@@ -3027,7 +3206,7 @@ export interface PageOptions {
 }
 
 // @beta
-export const ParsedInput: React.ForwardRefExoticComponent<ParsedInputProps & React.RefAttributes<HTMLInputElement>>;
+export const ParsedInput: (props: ParsedInputProps) => JSX.Element | null;
 
 // @beta
 export interface ParsedInputProps extends CommonProps {
@@ -3036,6 +3215,7 @@ export interface ParsedInputProps extends CommonProps {
     onChange?: (newValue: number) => void;
     parseString: (stringValue: string) => ParseResults;
     readonly?: boolean;
+    ref?: React.Ref<HTMLInputElement>;
 }
 
 // @alpha
@@ -3148,7 +3328,7 @@ export function PrimitivePropertyValueRendererImpl(props: PrimitivePropertyValue
 // @public
 export interface PrimitiveRendererProps extends SharedRendererProps {
     // @beta
-    highlightProps?: HighlightedRecordProps;
+    highlight?: HighlightingComponentProps;
     indentation?: number;
     valueElement?: React.ReactNode;
     valueElementRenderer?: () => React.ReactNode;
@@ -3164,8 +3344,6 @@ export interface PropertyCategory {
     label: string;
     // (undocumented)
     name: string;
-    // @alpha (undocumented)
-    parentCategory?: PropertyCategory;
 }
 
 // @public
@@ -3178,7 +3356,27 @@ export class PropertyCategoryBlock extends React.Component<PropertyCategoryBlock
 // @public
 export interface PropertyCategoryBlockProps extends CommonProps {
     category: PropertyCategory;
+    // @beta
+    highlight?: HighlightingComponentProps;
     onExpansionToggled?: (categoryName: string) => void;
+}
+
+// @beta
+export abstract class PropertyCategoryDataFiltererBase extends PropertyDataFiltererBase {
+    // (undocumented)
+    recordMatchesFilter(): Promise<PropertyDataFilterResult>;
+}
+
+// @alpha
+export class PropertyCategoryLabelFilterer extends PropertyCategoryDataFiltererBase {
+    constructor(filterText?: string);
+    // (undocumented)
+    categoryMatchesFilter(node: PropertyCategory): Promise<PropertyDataFilterResult>;
+    // (undocumented)
+    get filterText(): string;
+    set filterText(value: string);
+    // (undocumented)
+    get isActive(): boolean;
 }
 
 // @public
@@ -3214,22 +3412,22 @@ export class PropertyDataChangeEvent extends BeEvent<PropertyDataChangesListener
 // @public
 export type PropertyDataChangesListener = () => void;
 
-// @alpha
+// @beta
 export abstract class PropertyDataFiltererBase implements IPropertyDataFilterer {
+    // (undocumented)
+    abstract categoryMatchesFilter(node: PropertyCategory, parents: PropertyCategory[]): Promise<PropertyDataFilterResult>;
     // (undocumented)
     abstract get isActive(): boolean;
     // (undocumented)
-    abstract matchesFilter(node: PropertyRecord, parents: PropertyRecord[]): Promise<PropertyDataFilterResult>;
-    // (undocumented)
     onFilterChanged: PropertyFilterChangeEvent;
+    // (undocumented)
+    abstract recordMatchesFilter(node: PropertyRecord, parents: PropertyRecord[]): Promise<PropertyDataFilterResult>;
 }
 
-// @alpha
+// @beta
 export interface PropertyDataFilterResult {
-    matchesCount?: {
-        label?: number;
-        value?: number;
-    };
+    filteredTypes?: FilteredType[];
+    matchesCount?: number;
     matchesFilter: boolean;
     shouldExpandNodeParents?: boolean;
     shouldForceIncludeDescendants?: boolean;
@@ -3275,6 +3473,8 @@ export abstract class PropertyEditorBase implements DataController {
 export class PropertyEditorManager {
     // (undocumented)
     static createEditor(editType: string, editorName?: string, dataControllerName?: string): PropertyEditorBase;
+    // @internal (undocumented)
+    static deregisterDataController(controllerName: string): void;
     // (undocumented)
     static hasCustomEditor(editType: string, editorName: string): boolean;
     // (undocumented)
@@ -3292,11 +3492,11 @@ export interface PropertyEditorProps extends CommonProps {
     setFocus?: boolean;
 }
 
-// @alpha
+// @beta
 export class PropertyFilterChangeEvent extends BeEvent<PropertyFilterChangesListener> {
 }
 
-// @alpha
+// @beta
 export type PropertyFilterChangesListener = () => void;
 
 // @public
@@ -3326,10 +3526,15 @@ export interface PropertyGridCategory {
 // @internal (undocumented)
 export class PropertyGridCommons {
     // (undocumented)
-    static assignRecordClickHandlers(records: PropertyRecord[], onPropertyLinkClick?: (property: PropertyRecord, text: string) => void): void;
+    static assignRecordClickHandlers(records: PropertyRecord[], onPropertyLinkClick: (property: PropertyRecord, text: string) => void): void;
     // (undocumented)
     static getCurrentOrientation(width: number, preferredOrientation?: Orientation, isOrientationFixed?: boolean, horizontalOrientationMinWidth?: number): Orientation;
-    }
+    static getLinks: (value: string) => Array<{
+        start: number;
+        end: number;
+    }>;
+    static handleLinkClick(text: string): void;
+}
 
 // @public
 export interface PropertyGridContextMenuArgs {
@@ -3408,16 +3613,9 @@ export interface PropertyPopupState {
 }
 
 // @beta
-export interface PropertyRecordMatchInfo {
+export abstract class PropertyRecordDataFiltererBase extends PropertyDataFiltererBase {
     // (undocumented)
-    matchCounts: {
-        label: number;
-        value: number;
-    };
-    // (undocumented)
-    matchIndex: number;
-    // (undocumented)
-    propertyName: string;
+    categoryMatchesFilter(): Promise<PropertyDataFilterResult>;
 }
 
 // @public
@@ -3439,7 +3637,7 @@ export class PropertyRenderer extends React.Component<PropertyRendererProps, Pro
 // @public
 export interface PropertyRendererProps extends SharedRendererProps {
     // @beta
-    highlightProps?: HighlightedRecordProps;
+    highlight?: HighlightingComponentProps;
     indentation?: number;
     // @beta
     isEditing?: boolean;
@@ -3505,15 +3703,32 @@ export interface PropertyViewProps extends SharedRendererProps {
     valueElementRenderer?: () => React.ReactNode;
 }
 
+// @alpha
+export function QuantityFormatPanel(props: QuantityFormatPanelProps): JSX.Element;
+
+// @alpha
+export interface QuantityFormatPanelProps extends CommonProps {
+    // (undocumented)
+    enableMinimumProperties?: boolean;
+    // (undocumented)
+    initialMagnitude?: number;
+    // (undocumented)
+    onFormatChange?: (format: FormatProps) => void;
+    // (undocumented)
+    quantityType: QuantityTypeArg;
+    showSample?: boolean;
+}
+
 // @beta
-export const QuantityInput: React.ForwardRefExoticComponent<QuantityProps & React.RefAttributes<HTMLInputElement>>;
+export function QuantityInput({ initialValue, quantityType, readonly, className, style, onQuantityChange, ref }: QuantityProps): JSX.Element;
 
 // @beta
 export interface QuantityProps extends CommonProps {
     initialValue: number;
     onQuantityChange: (newQuantityValue: number) => void;
-    quantityType: QuantityType;
+    quantityType: QuantityTypeArg;
     readonly?: boolean;
+    ref?: React.Ref<HTMLInputElement>;
 }
 
 // @public
@@ -3861,6 +4076,10 @@ export class SliderEditor extends React.PureComponent<PropertyEditorProps, Slide
     componentWillUnmount(): void;
     // (undocumented)
     getPropertyValue(): Promise<PropertyValue | undefined>;
+    // (undocumented)
+    get hasFocus(): boolean;
+    // (undocumented)
+    get htmlElement(): HTMLElement | null;
     // @internal (undocumented)
     render(): React.ReactNode;
     // @internal (undocumented)
@@ -3878,13 +4097,15 @@ export interface SolarDataProvider {
     day: Date;
     readonly dayStartMs: number;
     onTimeChanged?: SolarPlaybackProgressHandler;
+    setDateAndTime: (day: Date, isProjectDate?: boolean) => void;
     shadowColor: ColorDef;
     // (undocumented)
     readonly shouldShowTimeline: boolean;
     readonly sunrise: Date;
     readonly sunset: Date;
     supportsTimelineAnimation: boolean;
-    timeOfDay: Date;
+    readonly timeOfDay: Date;
+    readonly timeZoneOffset: number;
     // (undocumented)
     viewId: string;
     viewport?: ScreenViewport;
@@ -3898,6 +4119,8 @@ export class SolarTimeline extends React.PureComponent<SolarTimelineComponentPro
     constructor(props: SolarTimelineComponentProps);
     // (undocumented)
     componentWillUnmount(): void;
+    // (undocumented)
+    getLocalTime(ticks: number): Date;
     // (undocumented)
     render(): JSX.Element;
     }
@@ -3937,9 +4160,13 @@ export class SparseTree<T extends Node> {
     // (undocumented)
     insertChild(parentId: string | undefined, child: T, offset: number): void;
     // (undocumented)
+    moveNode(sourceParentId: string | undefined, sourceNodeId: string, targetParentId: string | undefined, targetIndex: number): void;
+    // (undocumented)
     removeChild(parentId: string | undefined, childId: string): void;
     // (undocumented)
     setChildren(parentId: string | undefined, children: T[], offset: number): void;
+    // (undocumented)
+    setNodeId(parentId: string | undefined, index: number, newId: string): boolean;
     // (undocumented)
     setNumChildren(parentId: string | undefined, numChildren: number): void;
 }
@@ -4238,7 +4465,7 @@ export interface TableDistinctValue {
     value: Primitives.Value;
 }
 
-// @beta
+// @beta @deprecated
 export interface TableDragDropProps<DragDropObject = any> {
     // (undocumented)
     dragProps?: DragSourceProps<DragDropObject>;
@@ -4246,10 +4473,10 @@ export interface TableDragDropProps<DragDropObject = any> {
     dropProps?: TableDropTargetProps<DragDropObject>;
 }
 
-// @beta
+// @beta @deprecated
 export type TableDragDropType = {} | RowItem | TableDataProvider;
 
-// @beta
+// @beta @deprecated
 export interface TableDropTargetProps<DragDropObject = any> extends DropTargetProps<DragDropObject> {
     canDropOn?: boolean;
 }
@@ -4355,6 +4582,10 @@ export class TextareaEditor extends React.PureComponent<PropertyEditorProps, Tex
     componentWillUnmount(): void;
     // (undocumented)
     getPropertyValue(): Promise<PropertyValue | undefined>;
+    // (undocumented)
+    get hasFocus(): boolean;
+    // (undocumented)
+    get htmlElement(): HTMLElement | null;
     // @internal (undocumented)
     render(): React.ReactNode;
     // @internal (undocumented)
@@ -4383,6 +4614,10 @@ export class TextEditor extends React.PureComponent<PropertyEditorProps, TextEdi
     componentWillUnmount(): void;
     // (undocumented)
     getPropertyValue(): Promise<PropertyValue | undefined>;
+    // (undocumented)
+    get hasFocus(): boolean;
+    // (undocumented)
+    get htmlElement(): HTMLElement | null;
     // @internal (undocumented)
     render(): React.ReactNode;
     // @internal (undocumented)
@@ -4399,6 +4634,10 @@ export class ThemedEnumEditor extends React.PureComponent<ThemedEnumEditorProps,
     componentWillUnmount(): void;
     // (undocumented)
     getPropertyValue(): Promise<PropertyValue | undefined>;
+    // (undocumented)
+    get hasFocus(): boolean;
+    // (undocumented)
+    get htmlElement(): HTMLElement | null;
     // @internal (undocumented)
     render(): JSX.Element;
     // @internal (undocumented)
@@ -4436,7 +4675,7 @@ export class Timeline extends React.Component<TimelineProps, TimelineState> {
 }
 
 // @alpha
-export class TimelineComponent extends React.PureComponent<TimelineComponentProps, TimelineComponentState> {
+export class TimelineComponent extends React.Component<TimelineComponentProps, TimelineComponentState> {
     constructor(props: TimelineComponentProps);
     // (undocumented)
     componentDidUpdate(prevProps: TimelineComponentProps): void;
@@ -4444,6 +4683,8 @@ export class TimelineComponent extends React.PureComponent<TimelineComponentProp
     componentWillUnmount(): void;
     // (undocumented)
     render(): JSX.Element;
+    // (undocumented)
+    shouldComponentUpdate(nextProps: TimelineComponentProps, nextState: TimelineComponentState): boolean;
     }
 
 // @alpha
@@ -4528,6 +4769,10 @@ export class ToggleEditor extends React.PureComponent<PropertyEditorProps, Toggl
     componentWillUnmount(): void;
     // (undocumented)
     getPropertyValue(): Promise<PropertyValue | undefined>;
+    // (undocumented)
+    get hasFocus(): boolean;
+    // (undocumented)
+    get htmlElement(): HTMLElement | null;
     // @internal (undocumented)
     render(): JSX.Element;
     // @internal (undocumented)
@@ -4734,7 +4979,7 @@ export class TreeDataSource implements IDisposable {
     // (undocumented)
     dispose(): void;
     // (undocumented)
-    readonly onItemsChanged: BeUiEvent<TreeDataChangesListener>;
+    readonly onItemsChanged: BeEvent<TreeDataChangesListener>;
     // (undocumented)
     requestItems(parent: TreeNodeItem | undefined, firstItemIndex: number, numItems: number, requestNumChildren: boolean): Observable_2<TreeDataSourceResult>;
 }
@@ -4821,6 +5066,8 @@ export class TreeImageLoader implements ITreeImageLoader {
 
 // @beta
 export interface TreeModel {
+    // (undocumented)
+    getChildOffset(parentId: string | undefined, childId: string): number | undefined;
     // (undocumented)
     getChildren(parentId: string | undefined): SparseArray<string> | undefined;
     // (undocumented)
@@ -4925,7 +5172,7 @@ export interface TreeModelRootNode {
 
 // @beta
 export class TreeModelSource {
-    constructor();
+    constructor(_model?: MutableTreeModel);
     getModel(): TreeModel;
     getVisibleNodes(): VisibleTreeNodes;
     modifyModel(callback: (model: MutableTreeModel) => void): void;
@@ -5207,6 +5454,10 @@ export class TypeConverterManager {
 export interface TypeEditor {
     // (undocumented)
     getPropertyValue: () => Promise<PropertyValue | undefined>;
+    // (undocumented)
+    hasFocus: boolean;
+    // (undocumented)
+    htmlElement: HTMLElement | null;
 }
 
 // @public
@@ -5231,7 +5482,7 @@ export interface Unsubscribable {
 }
 
 // @beta
-export const useAsyncValue: <T extends any>(value: T | PromiseLike<T>) => T | undefined;
+export const useAsyncValue: <T extends unknown>(value: T | PromiseLike<T>) => T | undefined;
 
 // @alpha
 export function useDebouncedAsyncValue<TReturn>(valueToBeResolved: undefined | (() => Promise<TReturn>)): {
@@ -5268,7 +5519,7 @@ export function usePropertyGridModelSource(props: {
 }): PropertyGridModelSource;
 
 // @internal (undocumented)
-export function useRenderedStringValue(record: PropertyRecord, stringValueCalculator: (record: PropertyRecord) => string | Promise<string>, context?: PropertyValueRendererContext): {
+export function useRenderedStringValue(record: PropertyRecord, stringValueCalculator: (record: PropertyRecord) => string | Promise<string>, context?: PropertyValueRendererContext, linksHandler?: LinkElementsInfo): {
     stringValue?: string;
     element: React.ReactNode;
 };
@@ -5459,7 +5710,9 @@ export interface VirtualizedPropertyGridContext {
         isResizeHandleBeingDragged?: boolean;
         onResizeHandleDragChanged?: (isDragStarted: boolean) => void;
         columnInfo?: PropertyGridColumnInfo;
-        highlightedRecordProps?: HighlightedRecordProps;
+        highlight?: HighlightingComponentProps & {
+            filteredTypes?: FilteredType[];
+        };
     };
     // (undocumented)
     gridEventHandler: IPropertyGridEventHandler;
@@ -5490,7 +5743,9 @@ export interface VirtualizedPropertyGridProps extends CommonPropertyGridProps {
     // (undocumented)
     eventHandler: IPropertyGridEventHandler;
     // (undocumented)
-    highlightedRecordProps?: HighlightedRecordProps;
+    highlight?: HighlightingComponentProps & {
+        filteredTypes?: FilteredType[];
+    };
     // (undocumented)
     model: IPropertyGridModel;
 }
@@ -5503,7 +5758,9 @@ export interface VirtualizedPropertyGridWithDataProviderProps extends CommonProp
     // (undocumented)
     dataProvider: IPropertyDataProvider;
     // (undocumented)
-    highlightedRecordProps?: HighlightedRecordProps;
+    highlight?: HighlightingComponentProps & {
+        filteredTypes?: FilteredType[];
+    };
 }
 
 // @beta
@@ -5531,6 +5788,10 @@ export class WeightEditor extends React.PureComponent<PropertyEditorProps, Weigh
     componentWillUnmount(): void;
     // (undocumented)
     getPropertyValue(): Promise<PropertyValue | undefined>;
+    // (undocumented)
+    get hasFocus(): boolean;
+    // (undocumented)
+    get htmlElement(): HTMLElement | null;
     // @internal (undocumented)
     render(): JSX.Element;
     // @internal (undocumented)
@@ -5571,16 +5832,16 @@ export class WeightPropertyEditor extends PropertyEditorBase {
     get reactNode(): React.ReactNode;
 }
 
-// @beta
+// @beta @deprecated
 export function withBreadcrumbDetailsDragDrop<P extends BreadcrumbDetailsProps, DragDropObject extends BreadcrumbDetailsDragDropType>(BreadcrumbComponent: React.ComponentType<P>): React.ComponentType<P & BreadcrumbDetailsDragDropProps<DragDropObject>>;
 
-// @beta
+// @beta @deprecated
 export function withBreadcrumbDragDrop<P extends BreadcrumbProps, DragDropObject extends TreeDragDropType>(BreadcrumbComponent: React.ComponentType<P>): React.ComponentType<P & BreadcrumbDragDropProps<DragDropObject>>;
 
-// @beta
-export const withDragSource: <ComponentProps extends {}, DragDropObject = any>(Component: React.ComponentType<ComponentProps>) => DndComponentClass<ComponentProps & WithDragSourceProps<DragDropObject>>;
+// @beta @deprecated
+export const withDragSource: <ComponentProps extends {}, DragDropObject = any>(Component: React.ComponentType<ComponentProps>) => DndComponentClass<typeof React.Component, ComponentProps & WithDragSourceProps<DragDropObject>>;
 
-// @beta
+// @beta @deprecated
 export interface WithDragSourceProps<DragDropObject = any> {
     altDropEffect?: DropEffects;
     // @internal (undocumented)
@@ -5601,10 +5862,10 @@ export interface WithDragSourceProps<DragDropObject = any> {
     type?: string | symbol | null;
 }
 
-// @beta
-export const withDropTarget: <ComponentProps extends {}, DragDropObject = any>(Component: React.ComponentType<ComponentProps>) => DndComponentClass<ComponentProps & WithDropTargetProps<DragDropObject>>;
+// @beta @deprecated
+export const withDropTarget: <ComponentProps extends {}, DragDropObject = any>(Component: React.ComponentType<ComponentProps>) => DndComponentClass<typeof React.Component, ComponentProps & WithDropTargetProps<DragDropObject>>;
 
-// @beta
+// @beta @deprecated
 export interface WithDropTargetProps<DragDropObject = any> {
     // @internal (undocumented)
     canDrop?: boolean;
@@ -5621,7 +5882,7 @@ export interface WithDropTargetProps<DragDropObject = any> {
     type?: string | symbol;
 }
 
-// @beta
+// @beta @deprecated
 export function withTableDragDrop<P extends TableProps, DragDropObject extends TableDragDropType>(TableComponent: React.ComponentType<P>): React.ComponentType<P & TableDragDropProps<DragDropObject>>;
 
 

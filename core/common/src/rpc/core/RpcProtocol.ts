@@ -57,6 +57,9 @@ export interface RpcRequestFulfillment {
 
   /** A protocol-specific status code value for the request. */
   status: number;
+
+  /* A protocol-specific value for retrying this request. */
+  retry?: string;
 }
 
 /** @public */
@@ -77,7 +80,7 @@ export namespace RpcRequestFulfillment {
 /** Handles RPC protocol events.
  * @public
  */
-export type RpcProtocolEventHandler = (type: RpcProtocolEvent, object: RpcRequest | RpcInvocation) => void;
+export type RpcProtocolEventHandler = (type: RpcProtocolEvent, object: RpcRequest | RpcInvocation, err?: any) => void;
 
 /** An application protocol for an RPC interface.
  * @public

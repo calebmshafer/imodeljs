@@ -6,7 +6,9 @@
  * @module iModels
  */
 
-import { GuidString, OpenMode } from "@bentley/bentleyjs-core";
+import { GuidString } from "@bentley/bentleyjs-core";
+import { IModelEncryptionProps, OpenDbKey } from "./IModel";
+import { IModelVersionProps } from "./IModelVersion";
 
 /**
  * Status of downloading a briefcase
@@ -15,6 +17,7 @@ import { GuidString, OpenMode } from "@bentley/bentleyjs-core";
 export enum DownloadBriefcaseStatus {
   NotStarted,
   Initializing,
+  QueryCheckpointService,
   DownloadingCheckpoint,
   DownloadingChangeSets,
   ApplyingChangeSets,
@@ -22,75 +25,135 @@ export enum DownloadBriefcaseStatus {
   Error,
 }
 
-/** Operations allowed when synchronizing changes between the Briefcase and iModelHub
+/** The reserved BriefcaseId values used to identify special kinds of IModelDbs.
+ * @see [[BriefcaseId]]
  * @public
  */
-export enum SyncMode { FixedVersion = 1, PullAndPush = 2, PullOnly = 3 }
+export enum BriefcaseIdValue {
+  /** Indicates an invalid/illegal BriefcaseId */
+  Illegal = 0xffffffff,
 
-/**
- * Key to locate a briefcase
- * @internal
- */
-export type BriefcaseKey = string;
+  /** BriefcaseIds must be less than this value */
+  Max = 1 << 24,
 
-/**
- * Options to download the briefcase
- * @beta
+  /** All valid iModelHub issued BriefcaseIds will be equal or higher than this */
+  FirstValid = 2,
+
+  /** All valid iModelHub issued BriefcaseIds will be equal or lower than this */
+  LastValid = BriefcaseIdValue.Max - 11,
+
+  /** A Standalone copy of an iModel. Standalone files may accept changesets, but can never create new changesets.
+   * Checkpoints are Standalone files that may not accept any new changesets after they are created.
+   */
+  Standalone = 0,
+
+  /**
+   * @internal
+   * @deprecated use Standalone
+   */
+  DeprecatedStandalone = 1,
+}
+
+/** Whether a briefcase is editable or may only accept incoming changesets from iModelHub
+ * @public
  */
-export interface DownloadBriefcaseOptions {
-  /** This setting defines the operations allowed when synchronizing changes between the briefcase and iModelHub */
-  syncMode: SyncMode;
+export enum SyncMode {
+  /** Use a fixed version (i.e. a checkpoint). See [CheckpointManager]($backend) for preferred approach to using checkpoint files. */
+  FixedVersion = 1,
+  /** A briefcase that can be edited. A unique briefcaseId must be assigned by iModelHub. */
+  PullAndPush = 2,
+  /** use [BriefcaseIdValue.Standalone](%backend). This makes a briefcase that can accept changesets from iModelHub but can never create changesets. */
+  PullOnly = 3,
 }
 
 /**
- * Options to open the briefcase
+ * Options to open a previously downloaded briefcase
  * @beta
  */
 export interface OpenBriefcaseOptions {
-  /** Limit the opened briefcase for Readonly operations by establishing a Readonly connection with the Db */
+  /** open briefcase Readonly */
   openAsReadOnly?: boolean;
 }
 
 /**
- * Properties required to request download of a briefcase
- * @internal
+ * Properties that specify a briefcase within the local briefcase cache.
+ * @see BriefcaseManager.getFileName
+ * @beta
  */
-export interface RequestBriefcaseProps {
-  /** Context (Project or Asset) that the iModel belongs to */
-  readonly contextId: GuidString;
-
+export interface BriefcaseProps {
   /** Id of the iModel */
-  readonly iModelId: GuidString;
+  iModelId: GuidString;
 
-  /** Id of the change set */
-  readonly changeSetId: GuidString;
+  /** BriefcaseId of the briefcase */
+  briefcaseId: number;
 }
 
-/**
- * Properties of a briefcase
- * @internal
+/** Properties for opening a local briefcase file via [BriefcaseDb.open]($backend)
+ * @beta
  */
-export interface BriefcaseProps extends RequestBriefcaseProps, DownloadBriefcaseOptions {
-  /** Key to locate the briefcase in the disk cache */
-  readonly key: BriefcaseKey;
+export interface OpenBriefcaseProps extends IModelEncryptionProps, OpenDbKey {
+  /** the full path to the briefcase file  */
+  fileName: string;
+  /** If true, open the briefcase readonly */
+  readonly?: boolean;
+}
 
-  /** Mode used to open the briefcase */
-  openMode: OpenMode;
+/** Properties of a local briefcase file, returned by [BriefcaseManager.getCachedBriefcases]($backend) and [BriefcaseManager.downloadBriefcase]($backend)
+ * @beta
+ */
+export interface LocalBriefcaseProps {
+  /** Full path of local file. */
+  fileName: string;
 
-  /** Status of downloading a briefcase */
-  downloadStatus: DownloadBriefcaseStatus;
+  /** Context (Project or Asset) of the iModel. */
+  contextId: GuidString;
 
-  /** File size of the briefcase on disk - only set for briefcases that are completely downloaded */
-  fileSize?: number;
+  /** The iModelId. */
+  iModelId: GuidString;
+
+  /** The briefcaseId. */
+  briefcaseId: number;
+
+  /** The current changeSetId. */
+  changeSetId: GuidString;
+}
+
+/** Properties for downloading a briefcase to a local file, from iModelHub.
+ * @beta
+ */
+export interface RequestNewBriefcaseProps {
+  /** Context (Project or Asset) that the iModel belongs to. */
+  contextId: GuidString;
+
+  /** The iModelId for the new briefcase. */
+  iModelId: GuidString;
+
+  /** Full path of local file to store the briefcase. If undefined, a file will be created in the briefcase cache, and this member will be filled with the full path to the file.
+   * Callers can use this to open the briefcase after the download completes.
+   * @note this member is both an input and an output.
+   */
+  fileName?: string;
+
+  /** The BriefcaseId of the newly downloaded briefcase. If undefined, a new BriefcaseId will be acquired from iModelHub before the download, and is returned in this member.
+   * @note this member is both an input and an output.
+   *
+   */
+  briefcaseId?: number;
+
+  /** Id of the change set of the new briefcase. If undefined, use latest. */
+  asOf?: IModelVersionProps;
 }
 
 /**
  * Manages the download of a briefcase
- * @internal
+ * @beta
  */
 export interface BriefcaseDownloader {
-  /** Properties of the briefcase that's being downloaded */
-  briefcaseProps: BriefcaseProps;
+  /** Id of the briefcase being downloaded */
+  briefcaseId: number;
+
+  /** the name of the local file for the briefcase */
+  fileName: string;
 
   /** Promise that resolves when the download completes. await this to complete the download */
   downloadPromise: Promise<void>;
@@ -136,4 +199,29 @@ export interface UpgradeOptions {
 
   /** Options that control whether a profile upgrade should be performed when opening a file */
   profile?: ProfileOptions;
+}
+
+/**
+ * The state of the schemas in the Db compared with what the current version of the software expects
+ * Note: The state may vary depending on whether the Db is to be opened ReadOnly or ReadWrite.
+ * @beta
+ */
+export enum SchemaState {
+  /** The schemas in the Db are up-to-date, and do not need to be upgraded before opening it with the current version of the software */
+  UpToDate,
+
+  /** It's required that the schemas in the Db be upgraded before it can be opened with the current version of the software.
+   * This may happen in read-write scenarios where the application requires a newer version of the schemas to be in place before
+   * it can write data based on that new schema.
+   */
+  UpgradeRequired,
+
+  /** It's recommended, but not necessary that the schemas in the Db be upgraded before opening it with the current version of the software */
+  UpgradeRecommended,
+
+  /** The schemas in the Db are too old to be opened by the current version of the software. Upgrade using the API is not possible. */
+  TooOld,
+
+  /** The schemas in the Db are too new to be opened by the current version of the software */
+  TooNew,
 }

@@ -1,6 +1,110 @@
 # Change Log - @bentley/imodelhub-client-tests
 
-This log was last generated on Mon, 23 Nov 2020 22:19:30 GMT and should not be manually modified.
+This log was last generated on Tue, 09 Mar 2021 20:28:13 GMT and should not be manually modified.
+
+## 2.13.0
+Tue, 09 Mar 2021 20:28:13 GMT
+
+### Updates
+
+- Added HubIModel.DataLocationId property
+- Updated to use TypeScript 4.1
+- begin rename project from iModel.js to iTwin.js
+
+## 2.12.3
+Mon, 08 Mar 2021 15:32:00 GMT
+
+_Version update only_
+
+## 2.12.2
+Wed, 03 Mar 2021 18:48:52 GMT
+
+_Version update only_
+
+## 2.12.1
+Tue, 23 Feb 2021 20:54:45 GMT
+
+_Version update only_
+
+## 2.12.0
+Thu, 18 Feb 2021 22:10:13 GMT
+
+### Updates
+
+- Test fixes to setup mock with the new PrecedingCheckpointV2 relationship
+
+## 2.11.2
+Thu, 18 Feb 2021 02:50:59 GMT
+
+_Version update only_
+
+## 2.11.1
+Thu, 04 Feb 2021 17:22:41 GMT
+
+_Version update only_
+
+## 2.11.0
+Thu, 28 Jan 2021 13:39:27 GMT
+
+### Updates
+
+- Added CheckpointV2 failure info support
+- Fixes for iModels test which create too many iModels
+- Fixed the tests to not delete random iModels
+- Altered iModelHub client tests to re-use iModels where possible
+
+## 2.10.3
+Fri, 08 Jan 2021 18:34:03 GMT
+
+_Version update only_
+
+## 2.10.2
+Fri, 08 Jan 2021 14:52:02 GMT
+
+_Version update only_
+
+## 2.10.1
+Tue, 22 Dec 2020 00:53:38 GMT
+
+_Version update only_
+
+## 2.10.0
+Fri, 18 Dec 2020 18:24:01 GMT
+
+### Updates
+
+- Added CheckpointV2 client tests
+- Increased timeout for some iModelHub tests
+
+## 2.9.9
+Sun, 13 Dec 2020 19:00:03 GMT
+
+_Version update only_
+
+## 2.9.8
+Fri, 11 Dec 2020 02:57:36 GMT
+
+_Version update only_
+
+## 2.9.7
+Wed, 09 Dec 2020 20:58:23 GMT
+
+_Version update only_
+
+## 2.9.6
+Mon, 07 Dec 2020 18:40:48 GMT
+
+_Version update only_
+
+## 2.9.5
+Sat, 05 Dec 2020 01:55:56 GMT
+
+_Version update only_
+
+## 2.9.4
+Wed, 02 Dec 2020 20:55:40 GMT
+
+_Version update only_
 
 ## 2.9.3
 Mon, 23 Nov 2020 20:57:56 GMT
@@ -188,7 +292,7 @@ Fri, 10 Jul 2020 17:23:14 GMT
 
 ### Updates
 
-- Switched projects for some iModelHub tests. 
+- Switched projects for some iModelHub tests.
 
 ## 2.2.1
 Tue, 07 Jul 2020 14:44:52 GMT

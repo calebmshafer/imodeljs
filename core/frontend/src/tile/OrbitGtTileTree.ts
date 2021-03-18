@@ -6,7 +6,7 @@
  * @module TileTreeSupplier
  */
 
-import { BeTimePoint, compareStrings, Id64String } from "@bentley/bentleyjs-core";
+import { BeTimePoint, compareStrings, compareStringsOrUndefined, Id64String } from "@bentley/bentleyjs-core";
 import { Point3d, Range3d, Transform, TransformProps, Vector3d } from "@bentley/geometry-core";
 import {
   BatchType, ColorDef, Feature,
@@ -31,33 +31,38 @@ import { SceneContext } from "../ViewContext";
 import { ViewingSpace } from "../ViewingSpace";
 import { Viewport } from "../Viewport";
 import {
-  createClassifierTileTreeReference,
-  RealityModelTileTree, SpatialClassifierTileTreeReference, Tile, TileContent, TileDrawArgs, TileLoadPriority, TileParams, TileRequest,
-  TileTree, TileTreeOwner, TileTreeParams, TileTreeReference, TileTreeSet, TileTreeSupplier,
+  createClassifierTileTreeReference, DisclosedTileTreeSet, RealityModelTileTree, SpatialClassifierTileTreeReference, Tile, TileContent,
+  TileDrawArgs, TileLoadPriority, TileParams, TileRequest, TileTree, TileTreeOwner, TileTreeParams, TileTreeReference, TileTreeSupplier,
 } from "./internal";
 import { TileUsageMarker } from "./TileUsageMarker";
 
 const scratchRange = Range3d.create();
 const scratchWorldFrustum = new Frustum();
 
+interface OrbitGtTreeId {
+  orbitGtProps: OrbitGtBlobProps;
+  modelId: Id64String;
+}
+
 class OrbitGtTreeSupplier implements TileTreeSupplier {
-  public getOwner(treeId: OrbitGtBlobProps, iModel: IModelConnection): TileTreeOwner {
+  public getOwner(treeId: OrbitGtTreeId, iModel: IModelConnection): TileTreeOwner {
     return iModel.tiles.getTileTreeOwner(treeId, this);
   }
 
-  public async createTileTree(treeId: OrbitGtBlobProps, iModel: IModelConnection): Promise<TileTree | undefined> {
-    const modelId = iModel.transientIds.next;
-    return OrbitGtTileTree.createOrbitGtTileTree(treeId, iModel, modelId);
+  public async createTileTree(treeId: OrbitGtTreeId, iModel: IModelConnection): Promise<TileTree | undefined> {
+    return OrbitGtTileTree.createOrbitGtTileTree(treeId.orbitGtProps, iModel, treeId.modelId);
   }
 
-  public compareTileTreeIds(lhs: OrbitGtBlobProps, rhs: OrbitGtBlobProps): number {
-    let cmp = compareStrings(lhs.accountName, rhs.accountName);
+  public compareTileTreeIds(lhs: OrbitGtTreeId, rhs: OrbitGtTreeId): number {
+    let cmp = compareStrings(lhs.orbitGtProps.accountName, rhs.orbitGtProps.accountName);
+    if (0 === cmp)
+      cmp = compareStringsOrUndefined(lhs.modelId, rhs.modelId);
     if (0 === cmp) {
-      cmp = compareStrings(lhs.blobFileName, rhs.blobFileName);
+      cmp = compareStrings(lhs.orbitGtProps.blobFileName, rhs.orbitGtProps.blobFileName);
       if (0 === cmp) {
-        cmp = compareStrings(lhs.containerName, rhs.containerName);
+        cmp = compareStrings(lhs.orbitGtProps.containerName, rhs.orbitGtProps.containerName);
         if (0 === cmp)
-          cmp = compareStrings(lhs.sasToken, rhs.sasToken);
+          cmp = compareStrings(lhs.orbitGtProps.sasToken, rhs.orbitGtProps.sasToken);
       }
     }
     return cmp;
@@ -121,7 +126,9 @@ class OrbitGtTileTreeParams implements TileTreeParams {
 class OrbitGtRootTile extends Tile {
   protected _loadChildren(_resolve: (children: Tile[] | undefined) => void, _reject: (error: Error) => void): void { }
   public async requestContent(_isCanceled: () => boolean): Promise<TileRequest.Response> { return undefined; }
+  public get channel() { return IModelApp.tileAdmin.channels.getForHttp("itwinjs-orbitgit"); }
   public async readContent(_data: TileRequest.ResponseData, _system: RenderSystem, _isCanceled?: () => boolean): Promise<TileContent> { return {}; }
+  public freeMemory(): void { }
 
   constructor(params: TileParams, tree: TileTree) { super(params, tree); }
 }
@@ -250,11 +257,6 @@ export class OrbitGtTileTree extends TileTree {
     this._doPrune(olderThan);
   }
 
-  public forcePrune() {
-    const rightNow = BeTimePoint.now();
-    this._doPrune(rightNow);
-  }
-
   public collectStatistics(stats: RenderMemory.Statistics): void {
     for (const tileGraphic of this._tileGraphics)
       tileGraphic[1].graphic.collectStatistics(stats);
@@ -341,6 +343,7 @@ export namespace OrbitGtTileTree {
     name?: string;
     classifiers?: SpatialClassifiers;
     displayStyle: DisplayStyleState;
+    modelId?: Id64String;
   }
 
   export async function createOrbitGtTileTree(props: OrbitGtBlobProps, iModel: IModelConnection, modelId: Id64String): Promise<TileTree | undefined> {
@@ -396,9 +399,10 @@ class OrbitGtTreeReference extends RealityModelTileTree.Reference {
   public get castsShadows() { return false; }
 
   public constructor(props: OrbitGtTileTree.ReferenceProps) {
-    super();
+    super(props.modelId, props.iModel);
 
-    this.treeOwner = orbitGtTreeSupplier.getOwner(props.orbitGtBlob, props.iModel);
+    const ogtTreeId: OrbitGtTreeId = { orbitGtProps: props.orbitGtBlob, modelId: this.modelId };
+    this.treeOwner = orbitGtTreeSupplier.getOwner(ogtTreeId, props.iModel);
     this._name = undefined !== props.name ? props.name : "";
 
     if (undefined !== props.classifiers)
@@ -415,7 +419,7 @@ class OrbitGtTreeReference extends RealityModelTileTree.Reference {
     super.addToScene(context);
   }
 
-  public discloseTileTrees(trees: TileTreeSet): void {
+  public discloseTileTrees(trees: DisclosedTileTreeSet): void {
     super.discloseTileTrees(trees);
 
     if (undefined !== this._classifier)

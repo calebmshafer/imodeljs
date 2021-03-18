@@ -19,8 +19,7 @@ public;class BasePointTypeConverter
 alpha;BaseSolarDataProvider 
 alpha;BaseTimelineDataProvider 
 beta;BasicPropertyEditor 
-beta;BeDragDropContext: typeof BeDragDropContextComponent & ContextComponent
-beta;BeDragDropContextComponent 
+beta;BeDragDropContext(props:
 public;BeInspireTree
 public;BeInspireTreeDataProvider
 public;BeInspireTreeDataProviderInterface
@@ -65,12 +64,12 @@ public;CellProps
 beta;CheckBoxInfo
 beta;CheckboxStateChange
 beta;ColorEditor 
-beta;ColorPickerButton: React.ForwardRefExoticComponent
+beta;ColorPickerButton: (props: ColorPickerProps) => JSX.Element | null
 beta;ColorPickerDialog({ dialogTitle, color, onOkResult, onCancelResult, colorPresets }: ColorPickerDialogProps): JSX.Element
 beta;ColorPickerDialogProps
 beta;ColorPickerPanel({ activeColor, onColorChange, colorPresets }: ColorPickerPanelProps): JSX.Element
 beta;ColorPickerPanelProps
-beta;ColorPickerPopup: React.ForwardRefExoticComponent
+beta;ColorPickerPopup: (props: ColorPickerPopupProps) => JSX.Element | null
 beta;ColorPickerPopupProps 
 beta;ColorPickerProps 
 beta;ColorPropertyEditor 
@@ -82,7 +81,7 @@ public;CommonPropertyGridProps
 public;CompletionObserver
 beta;CompositeFilterDescriptor 
 beta;CompositeFilterDescriptorCollection
-alpha;CompositeFilterType
+beta;CompositeFilterType
 alpha;CompositePropertyDataFilterer 
 public;CompositeTypeConverter 
 internal;ContextMenu 
@@ -93,6 +92,7 @@ beta;ControlledSelectableContentProps
 beta;ControlledTree(props: ControlledTreeProps): JSX.Element
 beta;ControlledTreeProps 
 public;ConvertedPrimitives
+internal;convertPrimitiveRecordToString(record: PropertyRecord): string | Promise
 internal;CubeHover
 beta;CubeNavigationAid 
 beta;CubeNavigationAidProps 
@@ -115,6 +115,7 @@ internal;DateTimeEditor
 internal;DateTimePropertyEditor 
 public;DateTimeTypeConverter 
 public;class DateTimeTypeConverterBase 
+beta;DEFAULT_LINKS_HANDLER: LinkElementsInfo
 public;DelayLoadedTreeNodeItem 
 public;DEPRECATED_FilteringInputProps 
 public;DEPRECATED_Tree 
@@ -164,7 +165,8 @@ beta;FilterCompositionLogicalOperator
 beta;FilterDescriptor
 beta;FilterDescriptorCollection 
 beta;class FilterDescriptorCollectionBase
-alpha;FilteredPropertyData 
+beta;FilteredPropertyData 
+beta;FilteredType
 public;FilteringInput 
 public;FilteringInputProps = DEPRECATED_FilteringInputProps | NEW_FilteringInputProps
 beta;FilteringInputStatus
@@ -176,7 +178,20 @@ alpha;FlatGridItemBase
 alpha;FlatGridItemType
 public;FloatTypeConverter 
 internal;formatInputDate(inputDate: Date, timeDisplay?: TimeDisplay, customFormatter?: DateFormatter, alternateDateFormat?: AlternateDateFormats): string | undefined
+alpha;FormatPanel(props: FormatPanelProps): JSX.Element
+alpha;FormatPanelProps 
+alpha;FormatPrecision(props: FormatPrecisionProps): JSX.Element
+alpha;FormatPrecisionProps 
+alpha;FormatSample(props: FormatSampleProps): JSX.Element
+alpha;FormatSampleProps 
+alpha;FormatTypeOption(props: FormatTypeOptionProps): JSX.Element
+alpha;FormatTypeOptionProps 
+alpha;FormatUnitLabel(props: FormatUnitLabelProps): JSX.Element
+alpha;FormatUnitLabelProps 
+alpha;FormatUnits(props: FormatUnitsProps): JSX.Element
+alpha;FormatUnitsProps 
 public;from
+internal;getCSSColorFromDef(colorDef: ColorDef): string
 beta;GetCurrentlyEditedNode = () => BeInspireTreeNode
 internal;getToolbarDirection: (expandsTo: Direction) => OrthogonalDirection
 alpha;GridCategoryItem 
@@ -188,7 +203,6 @@ public;hasSelectionModeFlag: (selectionMode: SelectionMode, flag: SelectionModeF
 public;HexadecimalTypeConverter 
 beta;HighlightableTreeNodeProps
 beta;HighlightableTreeProps
-beta;HighlightedRecordProps
 beta;HighlightingEngine
 internal;HitBoxX
 internal;HitBoxY
@@ -217,7 +231,7 @@ internal;InputSwitchComponent
 internal;InputSwitchProps
 alpha;IntlFormatter 
 public;IntTypeConverter 
-alpha;IPropertyDataFilterer
+beta;IPropertyDataFilterer
 public;IPropertyDataProvider
 alpha;IPropertyGridEventHandler
 alpha;IPropertyGridModel
@@ -248,10 +262,11 @@ beta;LoadedNodeHierarchy
 beta;LoadedNodeHierarchyItem
 internal;MapMode
 public;MapPayloadToInspireNodeCallback
-public;matchLinks: (text: string) =>
 internal;MenuItem
 alpha;Milestone
 alpha;MilestoneRange
+alpha;MiscFormatOptions(props: MiscFormatOptionsProps): JSX.Element
+alpha;MiscFormatOptionsProps 
 internal;MultiSelectionHandler
 alpha;MutableCategorizedArrayProperty 
 alpha;MutableCategorizedPrimitiveProperty 
@@ -297,7 +312,7 @@ alpha;OrthogonalDirection
 internal;OrthogonalDirectionHelpers
 beta;PagedTreeNodeLoader
 public;PageOptions
-beta;ParsedInput: React.ForwardRefExoticComponent
+beta;ParsedInput: (props: ParsedInputProps) => JSX.Element | null
 beta;ParsedInputProps 
 alpha;PlaybackSettings
 alpha;PlaybackSettingsChangeHandler = (settingsChange: PlaybackSettings) => void
@@ -320,19 +335,21 @@ public;PrimitiveRendererProps
 public;PropertyCategory
 public;PropertyCategoryBlock 
 public;PropertyCategoryBlockProps 
+beta;class PropertyCategoryDataFiltererBase 
+alpha;PropertyCategoryLabelFilterer 
 public;PropertyContainerType
 public;PropertyData
 public;PropertyDataChangeEvent 
 public;PropertyDataChangesListener = () => void
-alpha;class PropertyDataFiltererBase 
-alpha;PropertyDataFilterResult
+beta;class PropertyDataFiltererBase 
+beta;PropertyDataFilterResult
 public;PropertyDialogState
 public;PropertyEditingArgs
 beta;class PropertyEditorBase 
 beta;PropertyEditorManager
 beta;PropertyEditorProps 
-alpha;PropertyFilterChangeEvent 
-alpha;PropertyFilterChangesListener = () => void
+beta;PropertyFilterChangeEvent 
+beta;PropertyFilterChangesListener = () => void
 public;PropertyGrid 
 public;PropertyGridCategory
 internal;PropertyGridCommons
@@ -348,7 +365,7 @@ public;PropertyGridProps
 internal;PropertyLabelRenderer 
 public;PropertyLabelRendererProps
 public;PropertyPopupState
-beta;PropertyRecordMatchInfo
+beta;class PropertyRecordDataFiltererBase 
 public;PropertyRenderer 
 public;PropertyRendererProps 
 beta;PropertyUpdatedArgs
@@ -356,7 +373,9 @@ public;PropertyValueRendererContext
 public;PropertyValueRendererManager
 public;PropertyView 
 public;PropertyViewProps 
-beta;QuantityInput: React.ForwardRefExoticComponent
+alpha;QuantityFormatPanel(props: QuantityFormatPanelProps): JSX.Element
+alpha;QuantityFormatPanelProps 
+beta;QuantityInput({ initialValue, quantityType, readonly, className, style, onQuantityChange, ref }: QuantityProps): JSX.Element
 beta;QuantityProps 
 public;ReactDataGridColumn 
 public;ResultSelector 

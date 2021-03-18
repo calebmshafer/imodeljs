@@ -3,9 +3,11 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 import { app } from "electron";
+import * as fs from "fs";
 import * as path from "path";
+import { ProcessDetector } from "@bentley/bentleyjs-core";
 import { IModelHost, IModelJsFs } from "@bentley/imodeljs-backend";
-import { MobileRpcConfiguration, RpcManager } from "@bentley/imodeljs-common";
+import { RpcManager } from "@bentley/imodeljs-common";
 import { Reporter } from "@bentley/perf-tools/lib/Reporter";
 import DisplayPerfRpcInterface from "../common/DisplayPerfRpcInterface";
 import { addColumnsToCsvFile, addDataToCsvFile, addEndOfTestToCsvFile, createFilePath, createNewCsvFile } from "./CsvWriter";
@@ -16,7 +18,7 @@ export default class DisplayPerfRpcImpl extends DisplayPerfRpcInterface {
   public async getDefaultConfigs(): Promise<string> {
     let jsonStr = "";
     let defaultJsonFile;
-    if (MobileRpcConfiguration.isMobileBackend && process.env.DOCS) {
+    if (ProcessDetector.isMobileAppBackend && process.env.DOCS) {
       defaultJsonFile = path.join(process.env.DOCS, "MobilePerformanceConfig.json");
     } else {
       defaultJsonFile = "./src/backend/DefaultConfig.json";
@@ -28,7 +30,7 @@ export default class DisplayPerfRpcImpl extends DisplayPerfRpcInterface {
     }
     let argOutputPath: string | undefined;
     process.argv.forEach((arg, index) => {
-      if (index >= 2 && arg !== "chrome" && arg !== "edge" && arg !== "firefox" && arg.split(".").pop() !== "json") {
+      if (index >= 2 && arg !== "chrome" && arg !== "edge" && arg !== "firefox" && arg !== "headless" && arg.split(".").pop() !== "json") {
         while (arg.endsWith("\\") || arg.endsWith("\/"))
           arg = arg.slice(0, -1);
         argOutputPath = `"argOutputPath": "${arg}",`;
@@ -42,6 +44,41 @@ export default class DisplayPerfRpcImpl extends DisplayPerfRpcInterface {
     return jsonStr;
   }
 
+  public async writeExternalFile(outputPath: string, outputName: string, append: boolean, content: string): Promise<void> {
+    const fileName = this.createFullFilePath(outputPath, outputName);
+    if (undefined === fileName)
+      return;
+
+    const filePath = this.getFilePath(fileName);
+    if (!fs.existsSync(filePath))
+      this.createFilePath(filePath);
+
+    if (!append && fs.existsSync(fileName))
+      fs.unlinkSync(fileName);
+
+    if (append)
+      fs.appendFileSync(fileName, content);
+    else
+      fs.writeFileSync(fileName, content);
+  }
+
+  private createFilePath(filePath: string) {
+    const files = filePath.split(/\/|\\/); // /\.[^/.]+$/ // /\/[^\/]+$/
+    let curFile = "";
+    for (const file of files) {
+      if (file === "")
+        break;
+
+      curFile += `${file}\\`;
+      if (!fs.existsSync(curFile))
+        fs.mkdirSync(curFile);
+    }
+  }
+
+  public async consoleLog(content: string): Promise<void> {
+    console.log(content); // eslint-disable-line no-console
+  }
+
   public async saveCsv(outputPath: string, outputName: string, rowDataJson: string, csvFormat?: string): Promise<void> {
     const rowData = new Map<string, number | string>(JSON.parse(rowDataJson));
     const testName = rowData.get("Test Name") as string;
@@ -49,7 +86,7 @@ export default class DisplayPerfRpcImpl extends DisplayPerfRpcInterface {
     if (csvFormat === "original") {
       rowData.delete("Browser");
       if (outputPath !== undefined && outputName !== undefined) {
-        if (MobileRpcConfiguration.isMobileBackend && process.env.DOCS)
+        if (ProcessDetector.isMobileAppBackend && process.env.DOCS)
           outputPath = process.env.DOCS;
         let outputFile = this.createFullFilePath(outputPath, outputName);
         outputFile = outputFile ? outputFile : "";
@@ -99,7 +136,7 @@ export default class DisplayPerfRpcImpl extends DisplayPerfRpcInterface {
 
   public async savePng(fileName: string, png: string) {
     let filePath;
-    if (MobileRpcConfiguration.isMobileBackend && process.env.DOCS) {
+    if (ProcessDetector.isMobileAppBackend && process.env.DOCS) {
       filePath = process.env.DOCS;
       fileName = path.join(filePath, fileName);
     } else {
@@ -168,6 +205,21 @@ export default class DisplayPerfRpcImpl extends DisplayPerfRpcInterface {
     if (undefined === jsonStr)
       return "";
     return jsonStr;
+  }
+
+  /**
+   * See https://stackoverflow.com/questions/26246601/wildcard-string-comparison-in-javascript
+   * Get regex to find strings matching a given rule wildcard. Makes sure that it is case-insensitive.
+   */
+  private _matchRuleRegex(rule: string) {
+    rule = rule.toLowerCase();
+    const escapeRegex = (str: string) => str.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+    return new RegExp(`^${rule.split("*").map(escapeRegex).join(".*")}$`);
+  }
+
+  public async getMatchingFiles(rootDir: string, pattern: string): Promise<string> {
+    const fileNames = JSON.stringify(IModelJsFs.recursiveFindSync(rootDir, this._matchRuleRegex(pattern)));
+    return fileNames;
   }
 
 }

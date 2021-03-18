@@ -6,6 +6,7 @@
 
 import { BentleyError } from '@bentley/bentleyjs-core';
 import { EntityProps } from '@bentley/imodeljs-common';
+import { FormatProps } from '@bentley/imodeljs-quantity';
 import { GetMetaDataFunction } from '@bentley/bentleyjs-core';
 import { GuidString } from '@bentley/bentleyjs-core';
 import { Id64String } from '@bentley/bentleyjs-core';
@@ -42,6 +43,8 @@ export interface BaseFieldJSON {
     name: string;
     // (undocumented)
     priority: number;
+    // (undocumented)
+    renderer?: RendererDescription;
     // (undocumented)
     type: TypeDescription;
 }
@@ -183,12 +186,14 @@ export interface ClassInfoJSON {
     name: string;
 }
 
+// @internal (undocumented)
+export interface CommonIpcParams {
+    // (undocumented)
+    clientId: string;
+}
+
 // @public
-export type ComputeDisplayValueCallback = (type: string, value: string | number | boolean | {
-    x: number;
-    y: number;
-    z?: number;
-} | undefined, displayValue: string) => Promise<string>;
+export type ComputeDisplayValueCallback = (type: string, value: PrimitivePropertyValue, displayValue: string) => Promise<string>;
 
 // @public
 export interface ConditionContainer {
@@ -717,7 +722,7 @@ export type ExtendedHierarchyRpcRequestOptions = PresentationRpcRequestOptions<E
 
 // @public
 export class Field {
-    constructor(category: CategoryDescription, name: string, label: string, type: TypeDescription, isReadonly: boolean, priority: number, editor?: EditorDescription);
+    constructor(category: CategoryDescription, name: string, label: string, type: TypeDescription, isReadonly: boolean, priority: number, editor?: EditorDescription, renderer?: RendererDescription);
     category: CategoryDescription;
     // @alpha (undocumented)
     clone(): Field;
@@ -738,6 +743,7 @@ export class Field {
     priority: number;
     // @internal (undocumented)
     rebuildParentship(parentField?: NestedContentField): void;
+    renderer?: RendererDescription;
     // @internal (undocumented)
     resetParentship(): void;
     // @internal @deprecated
@@ -810,6 +816,34 @@ export enum GroupingSpecificationTypes {
     Property = "Property",
     // (undocumented)
     SameLabelInstance = "SameLabelInstance"
+}
+
+// @alpha (undocumented)
+export interface HierarchyCompareInfo {
+    // (undocumented)
+    changes: PartialHierarchyModification[];
+    // (undocumented)
+    continuationToken?: {
+        prevHierarchyNode: string;
+        currHierarchyNode: string;
+    };
+}
+
+// @alpha (undocumented)
+export namespace HierarchyCompareInfo {
+    export function fromJSON(json: HierarchyCompareInfoJSON): HierarchyCompareInfo;
+    export function toJSON(obj: HierarchyCompareInfo): HierarchyCompareInfoJSON;
+}
+
+// @alpha (undocumented)
+export interface HierarchyCompareInfoJSON {
+    // (undocumented)
+    changes: PartialHierarchyModificationJSON[];
+    // (undocumented)
+    continuationToken?: {
+        prevHierarchyNode: string;
+        currHierarchyNode: string;
+    };
 }
 
 // @public
@@ -1060,7 +1094,7 @@ export interface KeySetJSON {
 // @public
 export interface KindOfQuantityInfo {
     // @alpha
-    currentFormatId: string;
+    activeFormat?: FormatProps;
     label: string;
     name: string;
     // @alpha
@@ -1209,7 +1243,9 @@ export interface NavigationRuleBase extends RuleBase {
 
 // @public
 export class NestedContentField extends Field {
-    constructor(category: CategoryDescription, name: string, label: string, description: TypeDescription, isReadonly: boolean, priority: number, contentClassInfo: ClassInfo, pathToPrimaryClass: RelationshipPath, nestedFields: Field[], editor?: EditorDescription, autoExpand?: boolean);
+    constructor(category: CategoryDescription, name: string, label: string, description: TypeDescription, isReadonly: boolean, priority: number, contentClassInfo: ClassInfo, pathToPrimaryClass: RelationshipPath, nestedFields: Field[], editor?: EditorDescription, autoExpand?: boolean, renderer?: RendererDescription);
+    // @alpha (undocumented)
+    actualPrimaryClassIds: Id64String[];
     autoExpand?: boolean;
     // @alpha (undocumented)
     clone(): NestedContentField;
@@ -1229,6 +1265,8 @@ export class NestedContentField extends Field {
 
 // @public
 export interface NestedContentFieldJSON extends BaseFieldJSON {
+    // @alpha (undocumented)
+    actualPrimaryClassIds?: Id64String[];
     // (undocumented)
     autoExpand?: boolean;
     // (undocumented)
@@ -1289,6 +1327,8 @@ export interface Node {
 // @public (undocumented)
 export namespace Node {
     export function fromJSON(json: NodeJSON | string): Node;
+    // @internal (undocumented)
+    export function fromPartialJSON(json: PartialNodeJSON): PartialNode;
     // @internal
     export function listFromJSON(json: NodeJSON[] | string): Node[];
     // @internal
@@ -1296,6 +1336,8 @@ export namespace Node {
     // @internal
     export function reviver(key: string, value: any): any;
     export function toJSON(node: Node): NodeJSON;
+    // @internal (undocumented)
+    export function toPartialJSON(node: PartialNode): PartialNodeJSON;
 }
 
 // @public
@@ -1310,7 +1352,7 @@ export interface NodeArtifactsRule extends RuleBase, ConditionContainer {
 // @alpha (undocumented)
 export interface NodeDeletionInfo {
     // (undocumented)
-    node: Node;
+    target: NodeKey;
     // (undocumented)
     type: "Delete";
 }
@@ -1318,7 +1360,7 @@ export interface NodeDeletionInfo {
 // @alpha (undocumented)
 export interface NodeDeletionInfoJSON {
     // (undocumented)
-    node: NodeJSON;
+    target: NodeKeyJSON;
     // (undocumented)
     type: "Delete";
 }
@@ -1327,6 +1369,8 @@ export interface NodeDeletionInfoJSON {
 export interface NodeInsertionInfo {
     // (undocumented)
     node: Node;
+    // (undocumented)
+    parent?: NodeKey;
     // (undocumented)
     position: number;
     // (undocumented)
@@ -1337,6 +1381,8 @@ export interface NodeInsertionInfo {
 export interface NodeInsertionInfoJSON {
     // (undocumented)
     node: NodeJSON;
+    // (undocumented)
+    parent?: NodeKeyJSON;
     // (undocumented)
     position: number;
     // (undocumented)
@@ -1457,13 +1503,9 @@ export interface NodePathFilteringDataJSON {
 // @alpha (undocumented)
 export interface NodeUpdateInfo {
     // (undocumented)
-    changes: Array<{
-        name: string;
-        old: unknown;
-        new: unknown;
-    }>;
+    changes: PartialNode;
     // (undocumented)
-    node: Node;
+    target: NodeKey;
     // (undocumented)
     type: "Update";
 }
@@ -1471,13 +1513,9 @@ export interface NodeUpdateInfo {
 // @alpha (undocumented)
 export interface NodeUpdateInfoJSON {
     // (undocumented)
-    changes: Array<{
-        name: string;
-        old: unknown;
-        new: unknown;
-    }>;
+    changes: PartialNodeJSON;
     // (undocumented)
-    node: NodeJSON;
+    target: NodeKeyJSON;
     // (undocumented)
     type: "Update";
 }
@@ -1514,11 +1552,25 @@ export namespace PartialHierarchyModification {
 // @alpha (undocumented)
 export type PartialHierarchyModificationJSON = NodeInsertionInfoJSON | NodeDeletionInfoJSON | NodeUpdateInfoJSON;
 
+// @alpha (undocumented)
+export type PartialNode = AllOrNone<Partial<Node>, "key" | "label">;
+
+// @alpha (undocumented)
+export type PartialNodeJSON = AllOrNone<Partial<NodeJSON>, "key" | "labelDefinition">;
+
 // @internal (undocumented)
 export const PRESENTATION_COMMON_ROOT: string;
 
+// @internal (undocumented)
+export const PRESENTATION_IPC_CHANNEL_NAME = "presentation-ipc-interface";
+
 // @alpha
 export interface PresentationDataCompareOptions<TIModel, TNodeKey> extends RequestOptionsWithRuleset<TIModel> {
+    // (undocumented)
+    continuationToken?: {
+        prevHierarchyNode: string;
+        currHierarchyNode: string;
+    };
     // (undocumented)
     expandedNodeKeys?: TNodeKey[];
     // (undocumented)
@@ -1526,6 +1578,8 @@ export interface PresentationDataCompareOptions<TIModel, TNodeKey> extends Reque
         rulesetOrId?: Ruleset | string;
         rulesetVariables?: RulesetVariable[];
     };
+    // (undocumented)
+    resultSetSize?: number;
 }
 
 // @alpha
@@ -1538,14 +1592,22 @@ export class PresentationError extends BentleyError {
 }
 
 // @alpha (undocumented)
-export enum PresentationRpcEvents {
-    Update = "OnUpdate"
+export enum PresentationIpcEvents {
+    Update = "presentation.onUpdate"
+}
+
+// @internal (undocumented)
+export interface PresentationIpcInterface {
+    setRulesetVariable(params: SetRulesetVariableParams<RulesetVariableJSON>): Promise<void>;
+    updateHierarchyState(params: UpdateHierarchyStateParams<NodeKeyJSON>): Promise<void>;
 }
 
 // @public
 export class PresentationRpcInterface extends RpcInterface {
-    // @alpha
+    // @alpha @deprecated (undocumented)
     compareHierarchies(_token: IModelRpcProps, _options: PresentationDataCompareRpcOptions): PresentationRpcResponse<PartialHierarchyModificationJSON[]>;
+    // @alpha (undocumented)
+    compareHierarchiesPaged(_token: IModelRpcProps, _options: PresentationDataCompareRpcOptions): PresentationRpcResponse<HierarchyCompareInfoJSON>;
     // (undocumented)
     computeSelection(_token: IModelRpcProps, _options: SelectionScopeRpcRequestOptions, _ids: Id64String[], _scopeId: string): PresentationRpcResponse<KeySetJSON>;
     // @deprecated (undocumented)
@@ -1648,13 +1710,16 @@ export enum PresentationUnitSystem {
 }
 
 // @public
+export type PrimitivePropertyValue = string | number | boolean | Point | InstanceKey | undefined;
+
+// @public
 export interface PrimitiveTypeDescription extends BaseTypeDescription {
     valueFormat: PropertyValueFormat.Primitive;
 }
 
 // @public
 export class PropertiesField extends Field {
-    constructor(category: CategoryDescription, name: string, label: string, description: TypeDescription, isReadonly: boolean, priority: number, properties: Property[], editor?: EditorDescription);
+    constructor(category: CategoryDescription, name: string, label: string, description: TypeDescription, isReadonly: boolean, priority: number, properties: Property[], editor?: EditorDescription, renderer?: RendererDescription);
     // @alpha (undocumented)
     clone(): PropertiesField;
     static fromJSON(json: PropertiesFieldJSON | undefined, categories: CategoryDescription[]): PropertiesField | undefined;
@@ -1670,10 +1735,14 @@ export class PropertiesField extends Field {
 export interface PropertiesFieldDescriptor extends FieldDescriptorBase {
     // (undocumented)
     pathFromSelectToPropertyClass: StrippedRelationshipPath;
-    // (undocumented)
-    propertyClass: string;
-    // (undocumented)
-    propertyName: string;
+    properties: Array<{
+        class: string;
+        name: string;
+    }>;
+    // @deprecated (undocumented)
+    propertyClass?: string;
+    // @deprecated (undocumented)
+    propertyName?: string;
     // (undocumented)
     type: FieldDescriptorType.Properties;
 }
@@ -1791,6 +1860,7 @@ export enum PropertyGroupingValue {
 export interface PropertyInfo {
     classInfo: ClassInfo;
     enumerationInfo?: EnumerationInfo;
+    extendedType?: string;
     // @alpha
     kindOfQuantity?: KindOfQuantityInfo;
     name: string;
@@ -1833,6 +1903,7 @@ export interface PropertyOverrides {
     isDisplayed?: boolean;
     labelOverride?: string;
     overridesPriority?: number;
+    renderer?: PropertyRendererSpecification;
 }
 
 // @public
@@ -1841,6 +1912,11 @@ export interface PropertyRangeGroupSpecification {
     imageId?: string;
     label?: string;
     toValue: string;
+}
+
+// @public
+export interface PropertyRendererSpecification {
+    rendererName: string;
 }
 
 // @public
@@ -2009,6 +2085,11 @@ export interface RelationshipStepSpecification {
 }
 
 // @public
+export interface RendererDescription {
+    name: string;
+}
+
+// @public
 export type RepeatableRelationshipPathSpecification = RepeatableRelationshipStepSpecification | RepeatableRelationshipStepSpecification[];
 
 // @public
@@ -2048,6 +2129,8 @@ export class RpcRequestsHandler implements IDisposable {
     readonly clientId: string;
     // (undocumented)
     compareHierarchies(options: PresentationDataCompareOptions<IModelRpcProps, NodeKeyJSON>): Promise<PartialHierarchyModificationJSON[]>;
+    // (undocumented)
+    compareHierarchiesPaged(options: PresentationDataCompareOptions<IModelRpcProps, NodeKeyJSON>): Promise<HierarchyCompareInfoJSON>;
     // (undocumented)
     computeSelection(options: SelectionScopeRequestOptions<IModelRpcProps>, ids: Id64String[], scopeId: string): Promise<KeySetJSON>;
     // (undocumented)
@@ -2128,6 +2211,16 @@ export interface RulesetVariable {
     type: VariableValueTypes;
     // (undocumented)
     value: VariableValue;
+}
+
+// @public
+export interface RulesetVariableJSON {
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    type: VariableValueTypes;
+    // (undocumented)
+    value: VariableValueJSON;
 }
 
 // @public
@@ -2247,6 +2340,14 @@ export interface SelectionScopeRequestOptions<TIModel> extends RequestOptions<TI
 // @public
 export type SelectionScopeRpcRequestOptions = PresentationRpcRequestOptions<SelectionScopeRequestOptions<never>>;
 
+// @internal (undocumented)
+export interface SetRulesetVariableParams<TVariable> extends CommonIpcParams {
+    // (undocumented)
+    rulesetId: string;
+    // (undocumented)
+    variable: TVariable;
+}
+
 // @public
 export interface SingleSchemaClassSpecification {
     className: string;
@@ -2347,12 +2448,26 @@ export type TypeDescription = PrimitiveTypeDescription | ArrayTypeDescription | 
 // @alpha (undocumented)
 export const UPDATE_FULL = "FULL";
 
+// @internal (undocumented)
+export interface UpdateHierarchyStateParams<TNodeKey> extends CommonIpcParams {
+    // (undocumented)
+    changeType: "nodesExpanded" | "nodesCollapsed";
+    // (undocumented)
+    imodelKey: string;
+    // (undocumented)
+    nodeKeys: Array<TNodeKey>;
+    // (undocumented)
+    rulesetId: string;
+}
+
 // @alpha (undocumented)
 export interface UpdateInfo {
     // (undocumented)
-    [rulesetId: string]: {
-        hierarchy?: HierarchyUpdateInfo;
-        content?: ContentUpdateInfo;
+    [imodel: string]: {
+        [rulesetId: string]: {
+            hierarchy?: HierarchyUpdateInfo;
+            content?: ContentUpdateInfo;
+        };
     };
 }
 
@@ -2365,9 +2480,11 @@ export namespace UpdateInfo {
 // @alpha (undocumented)
 export interface UpdateInfoJSON {
     // (undocumented)
-    [rulesetId: string]: {
-        hierarchy?: HierarchyUpdateInfoJSON;
-        content?: ContentUpdateInfo;
+    [imodel: string]: {
+        [rulesetId: string]: {
+            hierarchy?: HierarchyUpdateInfoJSON;
+            content?: ContentUpdateInfo;
+        };
     };
 }
 

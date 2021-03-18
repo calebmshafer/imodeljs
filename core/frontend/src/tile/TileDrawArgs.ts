@@ -7,8 +7,8 @@
  */
 
 import { BeTimePoint } from "@bentley/bentleyjs-core";
-import { ClipVector, Map4d, Matrix4d, Point3d, Point4d, Range1d, Range3d, Transform } from "@bentley/geometry-core";
-import { FeatureAppearanceProvider, FrustumPlanes, ViewFlagOverrides } from "@bentley/imodeljs-common";
+import { ClipVector, Map4d, Matrix4d, Point3d, Point4d, Range1d, Range3d, Transform, Vector3d } from "@bentley/geometry-core";
+import { FeatureAppearanceProvider, FrustumPlanes, HiddenLine, ViewFlagOverrides } from "@bentley/imodeljs-common";
 import { FeatureSymbology } from "../render/FeatureSymbology";
 import { GraphicBranch } from "../render/GraphicBranch";
 import { RenderClipVolume } from "../render/RenderClipVolume";
@@ -17,7 +17,7 @@ import { RenderPlanarClassifier } from "../render/RenderPlanarClassifier";
 import { RenderTextureDrape } from "../render/RenderSystem";
 import { SceneContext } from "../ViewContext";
 import { ViewingSpace } from "../ViewingSpace";
-import { CoordSystem } from "../Viewport";
+import { CoordSystem } from "../CoordSystem";
 import { Tile, TileGraphicType, TileTree } from "./internal";
 
 const scratchRange = new Range3d();
@@ -36,9 +36,12 @@ export interface TileDrawArgParams {
   tree: TileTree;
   now: BeTimePoint;
   viewFlagOverrides: ViewFlagOverrides;
-  clipVolume: RenderClipVolume | undefined;
+  clipVolume?: RenderClipVolume;
   parentsAndChildrenExclusive: boolean;
   symbologyOverrides: FeatureSymbology.Overrides | undefined;
+  appearanceProvider?: FeatureAppearanceProvider;
+  hiddenLineSettings?: HiddenLine.Settings;
+  intersectionClip?: ClipVector;
 }
 /**
  * Arguments used when selecting and drawing [[Tile]]s.
@@ -72,15 +75,19 @@ export class TileDrawArgs {
   /** @internal */
   public parentsAndChildrenExclusive: boolean;
   /** @internal */
-  public appearanceProvider?: FeatureAppearanceProvider;
+  private _appearanceProvider?: FeatureAppearanceProvider;
+  /** internal */
+  public hiddenLineSettings?: HiddenLine.Settings;
   /** Tiles that we want to draw and that are ready to draw. May not actually be selected, e.g. if sibling tiles are not yet ready. */
   public readonly readyTiles = new Set<Tile>();
   /** For perspective views, the view-Z of the near plane. */
-  private readonly _nearViewZ?: number;
+  private readonly _nearFrontCenter?: Point3d;
   /** View Flag overrides */
   public get viewFlagOverrides(): ViewFlagOverrides { return this.graphics.viewFlagOverrides; }
   /**  Symbology overrides */
   public get symbologyOverrides(): FeatureSymbology.Overrides | undefined { return this.graphics.symbologyOverrides; }
+  /** If defined, tiles will be culled if they do not intersect the clip vector. */
+  public intersectionClip?: ClipVector;
 
   /** Compute the size in pixels of the specified tile at the point on its bounding sphere closest to the camera. */
   public getPixelSize(tile: Tile): number {
@@ -136,21 +143,24 @@ export class TileDrawArgs {
    * Device scaling is not applied.
    */
   protected computePixelSizeInMetersAtClosestPoint(center: Point3d, radius: number): number {
-    if (this.context.viewport.view.isCameraEnabled()) {
+    if (this.context.viewport.view.isCameraEnabled() && this._nearFrontCenter) {
+      const toFront = Vector3d.createStartEnd(center, this._nearFrontCenter);
+      const viewZ = this.context.viewport.rotation.rowZ();
+      // If the sphere overlaps the near front plane just use near front point.  This also handles behind eye conditions.
+      if (viewZ.dotProduct(toFront) < radius) {
+        center = this._nearFrontCenter;
+      } else {
       // Find point on sphere closest to eye.
-      const toEye = center.unitVectorTo(this.context.viewport.view.camera.eye);
-      if (toEye) {
-        toEye.scaleInPlace(radius);
-        center.addInPlace(toEye);
+        const toEye = center.unitVectorTo(this.context.viewport.view.camera.eye);
+
+        if (toEye) {  // Only if tile is not already behind the eye.
+          toEye.scaleInPlace(radius);
+          center.addInPlace(toEye);
+        }
       }
     }
 
     const viewPt = this.worldToViewMap.transform0.multiplyPoint3dQuietNormalize(center);
-    if (undefined !== this._nearViewZ && viewPt.z > this._nearViewZ) {
-      // Limit closest point on sphere to the near plane.
-      viewPt.z = this._nearViewZ;
-    }
-
     const viewPt2 = new Point3d(viewPt.x + 1.0, viewPt.y, viewPt.z);
     return this.worldToViewMap.transform1.multiplyPoint3dQuietNormalize(viewPt).distance(this.worldToViewMap.transform1.multiplyPoint3dQuietNormalize(viewPt2));
   }
@@ -189,6 +199,8 @@ export class TileDrawArgs {
     this.tree = tree;
     this.context = context;
     this.now = now;
+    this._appearanceProvider = params.appearanceProvider;
+    this.hiddenLineSettings = params.hiddenLineSettings;
 
     if (undefined !== clipVolume && !clipVolume.hasOutsideClipColor)
       this.clipVolume = clipVolume;
@@ -209,7 +221,7 @@ export class TileDrawArgs {
 
     this.parentsAndChildrenExclusive = parentsAndChildrenExclusive;
     if (context.viewport.view.isCameraEnabled())
-      this._nearViewZ = context.viewport.getFrustum(CoordSystem.View).frontCenter.z;
+      this._nearFrontCenter = context.viewport.getFrustum(CoordSystem.World).frontCenter;
   }
 
   /** A multiplier applied to a [[Tile]]'s `maximumSize` property to adjust level of detail.
@@ -238,6 +250,20 @@ export class TileDrawArgs {
     return undefined !== this.clipVolume ? this.clipVolume.clipVector : undefined;
   }
 
+  /** Add a provider to supplement or override the symbology overrides for the view.
+   * @note If a provider already exists, the new provider will be chained such that it sees the base overrides
+   * after they have potentially been modified by the existing provider.
+   * @beta
+   */
+  public addAppearanceProvider(provider: FeatureAppearanceProvider): void {
+    this._appearanceProvider = this._appearanceProvider ? FeatureAppearanceProvider.chain(this._appearanceProvider, provider) : provider;
+  }
+
+  /** @internal */
+  public get appearanceProvider(): FeatureAppearanceProvider | undefined {
+    return this._appearanceProvider;
+  }
+
   /** @internal */
   public produceGraphics(): RenderGraphic | undefined {
     return this._produceGraphicBranch(this.graphics);
@@ -248,9 +274,14 @@ export class TileDrawArgs {
     if (graphics.isEmpty)
       return undefined;
 
-    const classifierOrDrape = undefined !== this.planarClassifier ? this.planarClassifier : this.drape;
-    const appearanceProvider = this.appearanceProvider;
-    const opts = { iModel: this.tree.iModel, clipVolume: this.clipVolume, classifierOrDrape, appearanceProvider };
+    const opts = {
+      iModel: this.tree.iModel,
+      clipVolume: this.clipVolume,
+      classifierOrDrape: this.planarClassifier ?? this.drape,
+      appearanceProvider: this.appearanceProvider,
+      hline: this.hiddenLineSettings,
+    };
+
     return this.context.createGraphicBranch(graphics, this.location, opts);
   }
 

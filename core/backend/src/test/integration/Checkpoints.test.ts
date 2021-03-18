@@ -2,26 +2,22 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
+import { GuidString } from "@bentley/bentleyjs-core";
+import { CheckpointV2Query } from "@bentley/imodelhub-client";
+import { BlobDaemon } from "@bentley/imodeljs-native";
+import { TestUsers, TestUtility } from "@bentley/oidc-signin-tool";
 import { assert } from "chai";
 import { ChildProcess } from "child_process";
 import * as path from "path";
-import { GuidString } from "@bentley/bentleyjs-core";
-import { Checkpoint, CheckpointQuery } from "@bentley/imodelhub-client";
-import { BlobDaemon } from "@bentley/imodeljs-native";
-import { TestUsers, TestUtility } from "@bentley/oidc-signin-tool";
-import { AuthorizedBackendRequestContext, BriefcaseManager, IModelJsFs, SnapshotDb } from "../../imodeljs-backend";
-import { IModelTestUtils } from "../IModelTestUtils";
+import { AuthorizedBackendRequestContext, IModelHost, IModelJsFs, SnapshotDb } from "../../imodeljs-backend";
 import { KnownTestLocations } from "../KnownTestLocations";
 import { HubUtility } from "./HubUtility";
 
-// FIXME: Disabled because blockcache checkpoints are not in QA yet...
+// FIXME: Disabled because V2 checkpoints are not in QA yet...
 describe.skip("Checkpoints (#integration)", () => {
-
   let requestContext: AuthorizedBackendRequestContext;
-  const testProjectName = "iModelJsIntegrationTest";
-  const testIModelName = "Stadium Dataset 1";
   let testIModelId: GuidString;
-  let testProjectId: GuidString;
+  let testContextId: GuidString;
   let testChangeSetId: GuidString;
 
   const blockcacheDir = path.join(KnownTestLocations.outputDir, "blockcachevfs");
@@ -31,24 +27,23 @@ describe.skip("Checkpoints (#integration)", () => {
   before(async () => {
     originalEnv = { ...process.env };
     process.env.BLOCKCACHE_DIR = blockcacheDir;
-    IModelTestUtils.setupLogging();
     // IModelTestUtils.setupDebugLogLevels();
 
     requestContext = await TestUtility.getAuthorizedClientRequestContext(TestUsers.regular);
-    testProjectId = await HubUtility.queryProjectIdByName(requestContext, testProjectName);
-    testIModelId = await HubUtility.queryIModelIdByName(requestContext, testProjectId, testIModelName);
+    testContextId = await HubUtility.getTestContextId(requestContext);
+    testIModelId = await HubUtility.getTestIModelId(requestContext, HubUtility.testIModelNames.stadium);
     testChangeSetId = (await HubUtility.queryLatestChangeSet(requestContext, testIModelId))!.wsgId;
 
-    const checkpointQuery = new CheckpointQuery().byChangeSetId(testChangeSetId).selectBCVAccessKey();
-    const checkpoints: Checkpoint[] = await BriefcaseManager.imodelClient.checkpoints.get(requestContext, testIModelId, checkpointQuery);
+    const checkpointQuery = new CheckpointV2Query().byChangeSetId(testChangeSetId).selectContainerAccessKey();
+    const checkpoints = await IModelHost.iModelClient.checkpointsV2.get(requestContext, testIModelId, checkpointQuery);
     assert.equal(checkpoints.length, 1, "checkpoint missing");
-    assert.isDefined(checkpoints[0].bcvAccessKeyAccount, "checkpoint storage account is invalid");
+    assert.isDefined(checkpoints[0].containerAccessKeyAccount, "checkpoint storage account is invalid");
 
     // Start daemon process and wait for it to be ready
     daemonProc = BlobDaemon.start({
       daemonDir: blockcacheDir,
       storageType: "azure?sas=1",
-      user: checkpoints[0].bcvAccessKeyAccount!,
+      user: checkpoints[0].containerAccessKeyAccount!,
     });
     while (!IModelJsFs.existsSync(path.join(blockcacheDir, "portnumber.bcv"))) {
       await new Promise((resolve) => setImmediate(resolve));
@@ -63,14 +58,19 @@ describe.skip("Checkpoints (#integration)", () => {
       daemonProc.kill();
       await onDaemonExit;
     }
-    (BriefcaseManager as any).deleteFolderAndContents(blockcacheDir);
+    // BriefcaseManager.deleteFolderAndContents(blockcacheDir);
   });
 
-  it("should be able to open and read blockcache checkpoint", async () => {
-    const iModel = await SnapshotDb.openCheckpoint(requestContext, testProjectId, testIModelId, testChangeSetId);
+  it("should be able to open and read V2 checkpoint", async () => {
+    const iModel = await SnapshotDb.openCheckpointV2({
+      requestContext,
+      contextId: testContextId,
+      iModelId: testIModelId,
+      changeSetId: testChangeSetId,
+    });
     assert.equal(iModel.getGuid(), testIModelId);
     assert.equal(iModel.changeSetId, testChangeSetId);
-    assert.equal(iModel.contextId, testProjectId);
+    assert.equal(iModel.contextId, testContextId);
     assert.equal(iModel.rootSubject.name, "Stadium Dataset 1");
     let numModels = await iModel.queryRowCount("SELECT * FROM bis.model");
     assert.equal(numModels, 32);

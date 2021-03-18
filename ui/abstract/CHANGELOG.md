@@ -1,6 +1,109 @@
 # Change Log - @bentley/ui-abstract
 
-This log was last generated on Mon, 23 Nov 2020 22:19:30 GMT and should not be manually modified.
+This log was last generated on Tue, 09 Mar 2021 20:28:13 GMT and should not be manually modified.
+
+## 2.13.0
+Tue, 09 Mar 2021 20:28:13 GMT
+
+### Updates
+
+- Fixed broken double angle bracket link syntax
+- Updated to use TypeScript 4.1
+- begin rename project from iModel.js to iTwin.js
+
+## 2.12.3
+Mon, 08 Mar 2021 15:32:00 GMT
+
+_Version update only_
+
+## 2.12.2
+Wed, 03 Mar 2021 18:48:53 GMT
+
+_Version update only_
+
+## 2.12.1
+Tue, 23 Feb 2021 20:54:45 GMT
+
+_Version update only_
+
+## 2.12.0
+Thu, 18 Feb 2021 22:10:13 GMT
+
+### Updates
+
+- AccuDraw bi-directional value updates
+- Correctly handle capitalized SyncEventIds.
+
+## 2.11.2
+Thu, 18 Feb 2021 02:50:59 GMT
+
+_Version update only_
+
+## 2.11.1
+Thu, 04 Feb 2021 17:22:41 GMT
+
+_Version update only_
+
+## 2.11.0
+Thu, 28 Jan 2021 13:39:27 GMT
+
+### Updates
+
+- Add InstanceKey type description
+- Initial implementation of AccuDraw UI
+- Updated UI Learning docs
+
+## 2.10.3
+Fri, 08 Jan 2021 18:34:03 GMT
+
+_Version update only_
+
+## 2.10.2
+Fri, 08 Jan 2021 14:52:02 GMT
+
+_Version update only_
+
+## 2.10.1
+Tue, 22 Dec 2020 00:53:38 GMT
+
+_Version update only_
+
+## 2.10.0
+Fri, 18 Dec 2020 18:24:01 GMT
+
+### Updates
+
+- Refactor DialogItem and Property interfaces to make them easier to use.
+
+## 2.9.9
+Sun, 13 Dec 2020 19:00:03 GMT
+
+_Version update only_
+
+## 2.9.8
+Fri, 11 Dec 2020 02:57:36 GMT
+
+_Version update only_
+
+## 2.9.7
+Wed, 09 Dec 2020 20:58:23 GMT
+
+_Version update only_
+
+## 2.9.6
+Mon, 07 Dec 2020 18:40:48 GMT
+
+_Version update only_
+
+## 2.9.5
+Sat, 05 Dec 2020 01:55:56 GMT
+
+_Version update only_
+
+## 2.9.4
+Wed, 02 Dec 2020 20:55:40 GMT
+
+_Version update only_
 
 ## 2.9.3
 Mon, 23 Nov 2020 20:57:56 GMT
@@ -235,7 +338,7 @@ Wed, 06 May 2020 13:17:49 GMT
 - In source documentation. Some learning docs & API changes.
 - TOC for UI 2.0 Docs, @alpha to @beta, Components Examples
 - Started ui-components Learning doc section
-- Update doc tags for automatic UI creation 
+- Update doc tags for automatic UI creation
 - Refactor to remove duplicate ComponentGenerator instantiation. Rename files and components to remove React reference.
 - Update auto-generated dialog items to work with the Tool Settings Bar.
 - Add ConditionalBoolean support for isHidden and isDisabled properties.

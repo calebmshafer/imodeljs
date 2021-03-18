@@ -13,7 +13,7 @@ import {
   InputEditorSizeParams, PropertyEditorParams, PropertyEditorParamTypes, PropertyValue, PropertyValueFormat, RangeEditorParams,
   StandardEditorNames, StandardTypeNames,
 } from "@bentley/ui-abstract";
-import { NumericInput } from "@bentley/ui-core";
+import { NumberInput } from "@bentley/ui-core";
 import { PropertyEditorProps, TypeEditor } from "./EditorContainer";
 import { PropertyEditorBase, PropertyEditorManager } from "./PropertyEditorManager";
 
@@ -36,6 +36,7 @@ interface NumericInputEditorState {
  */
 export class NumericInputEditor extends React.PureComponent<PropertyEditorProps, NumericInputEditorState> implements TypeEditor {
   private _isMounted = false;
+  private _inputElement: React.RefObject<HTMLInputElement> = React.createRef();
 
   /** @internal */
   public readonly state: Readonly<NumericInputEditorState> = {
@@ -59,8 +60,16 @@ export class NumericInputEditor extends React.PureComponent<PropertyEditorProps,
     return propertyValue;
   }
 
-  private _updateValue = (value: number | null, _stringValue: string, _input: HTMLInputElement): void => {
-    const newValue = value !== null ? value : /* istanbul ignore next */ 0;
+  public get htmlElement(): HTMLElement | null {
+    return this._inputElement.current;
+  }
+
+  public get hasFocus(): boolean {
+    return document.activeElement === this._inputElement.current;
+  }
+
+  private _updateValue = (value: number | undefined, _stringValue: string): void => {
+    const newValue = value !== undefined ? value : /* istanbul ignore next */ 0;
 
     // istanbul ignore else
     if (this._isMounted)
@@ -141,7 +150,8 @@ export class NumericInputEditor extends React.PureComponent<PropertyEditorProps,
     };
 
     return (
-      <NumericInput
+      <NumberInput
+        ref={this._inputElement}
         className={className}
         style={style}
         value={this.state.value}

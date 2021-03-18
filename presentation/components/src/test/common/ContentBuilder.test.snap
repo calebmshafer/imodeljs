@@ -21,6 +21,9 @@ Object {
     "isStrict": true,
   },
   "name": "cross-platform",
+  "renderer": Object {
+    "name": "custom_renderer",
+  },
   "typename": "enum",
 }
 `;
@@ -33,6 +36,9 @@ Object {
     "params": Array [],
   },
   "name": "Gorgeous",
+  "renderer": Object {
+    "name": "custom_renderer",
+  },
   "typename": "double",
 }
 `;
@@ -41,6 +47,9 @@ exports[`ContentBuilder createPropertyDescription creates simple description 1`]
 Object {
   "displayLabel": "redefine Principal Licensed Plastic Shoes",
   "name": "European Unit of Account 17(E.U.A.-17)",
+  "renderer": Object {
+    "name": "custom_renderer",
+  },
   "typename": "real",
 }
 `;
@@ -141,6 +150,9 @@ PropertyRecord {
         "property": Object {
           "displayLabel": "robust Electronics",
           "name": "Savings Account$West Virginia",
+          "renderer": Object {
+            "name": "custom_renderer",
+          },
           "typename": "serial",
         },
         "value": Object {
@@ -202,6 +214,9 @@ PropertyRecord {
                   "params": Array [],
                 },
                 "name": "mindshare$Armenian Dram",
+                "renderer": Object {
+                  "name": "custom_renderer",
+                },
                 "typename": "point",
               },
               "value": Object {
@@ -233,6 +248,9 @@ PropertyRecord {
                   "params": Array [],
                 },
                 "name": "mindshare$Armenian Dram",
+                "renderer": Object {
+                  "name": "custom_renderer",
+                },
                 "typename": "point",
               },
               "value": Object {
@@ -275,12 +293,12 @@ PropertyRecord {
             "Movies": PropertyRecord {
               "description": "some display value 1 with link www.testLink.com",
               "isReadonly": true,
-              "links": Object {
-                "matcher": [Function],
-              },
               "property": Object {
                 "displayLabel": "SDD",
                 "name": "Florida$Movies",
+                "renderer": Object {
+                  "name": "custom_renderer",
+                },
                 "typename": "float",
               },
               "value": Object {
@@ -306,12 +324,12 @@ PropertyRecord {
             "Movies": PropertyRecord {
               "description": "some display value 2 with link http://www.testLinkTwo.com",
               "isReadonly": true,
-              "links": Object {
-                "matcher": [Function],
-              },
               "property": Object {
                 "displayLabel": "SDD",
                 "name": "Florida$Movies",
+                "renderer": Object {
+                  "name": "custom_renderer",
+                },
                 "typename": "float",
               },
               "value": Object {
@@ -364,6 +382,9 @@ PropertyRecord {
                     "property": Object {
                       "displayLabel": "indigo",
                       "name": "Kip$XSS$Ohio",
+                      "renderer": Object {
+                        "name": "custom_renderer",
+                      },
                       "typename": "int",
                     },
                     "value": Object {
@@ -391,6 +412,9 @@ PropertyRecord {
                     "property": Object {
                       "displayLabel": "indigo",
                       "name": "Kip$XSS$Ohio",
+                      "renderer": Object {
+                        "name": "custom_renderer",
+                      },
                       "typename": "int",
                     },
                     "value": Object {
@@ -435,6 +459,9 @@ PropertyRecord {
             "params": Array [],
           },
           "name": "Riel$Bacon",
+          "renderer": Object {
+            "name": "custom_renderer",
+          },
           "typename": "text",
         },
         "value": Object {
@@ -486,6 +513,9 @@ PropertyRecord {
                         "params": Array [],
                       },
                       "name": "bluetooth$Fantastic Steel Hat$Home Loan Account",
+                      "renderer": Object {
+                        "name": "custom_renderer",
+                      },
                       "typename": "datetime",
                     },
                     "value": Object {
@@ -517,6 +547,9 @@ PropertyRecord {
                         "params": Array [],
                       },
                       "name": "bluetooth$Fantastic Steel Hat$Home Loan Account",
+                      "renderer": Object {
+                        "name": "custom_renderer",
+                      },
                       "typename": "datetime",
                     },
                     "value": Object {
@@ -601,7 +634,7 @@ PropertyRecord {
   "property": Object {
     "displayLabel": "infrastructures Hong Kong Dollar Integration",
     "name": "Down-sized",
-    "typename": "Dong",
+    "typename": "dong",
   },
   "value": Object {
     "displayValue": "merged",
@@ -648,7 +681,7 @@ PropertyRecord {
   "property": Object {
     "displayLabel": "Credit Card Account",
     "name": "Savings Account",
-    "typename": "Lari",
+    "typename": "lari",
   },
   "value": Object {
     "displayValue": "",

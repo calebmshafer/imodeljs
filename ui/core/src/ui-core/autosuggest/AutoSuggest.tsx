@@ -18,7 +18,9 @@ import { UiCore } from "../UiCore";
  * @beta
  */
 export interface AutoSuggestData {
+  /** Value of [[AutoSuggest]] option. */
   value: string;
+  /** Label of [[AutoSuggest]] option. This is shown in the dropdown. */
   label: string;
 }
 
@@ -36,16 +38,16 @@ export type AsyncGetAutoSuggestDataFunc = (value: string) => Promise<AutoSuggest
  * @beta
  */
 export interface AutoSuggestProps extends React.InputHTMLAttributes<HTMLInputElement>, CommonProps {
-  /** Current value. */
+  /** Optional input value override. */
   value?: string;
   /** Options for dropdown. */
   options?: AutoSuggestData[] | GetAutoSuggestDataFunc;
   /** Asynchronously calculate suggestions for any given input value. */
   getSuggestions?: AsyncGetAutoSuggestDataFunc;
+  /** Gets a label associated with a given value */
+  getLabel?: (value: string | undefined) => string;
   /** Handler for when suggested selected. */
   onSuggestionSelected: (selected: AutoSuggestData) => void;
-  /** Indicates whether to set focus to the input element */
-  setFocus?: boolean;
   /** Handler for Enter key. */
   onPressEnter?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   /** Handler for Escape key. */
@@ -54,15 +56,15 @@ export interface AutoSuggestProps extends React.InputHTMLAttributes<HTMLInputEle
   onPressTab?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   /** Handler for input receiving focus. */
   onInputFocus?: (e: React.FocusEvent<HTMLInputElement>) => void;
-  /** Gets a label associated with a given value */
-  getLabel?: (value: string | undefined) => string;
   /** Called every time you need to clear suggestions. */
   onSuggestionsClearRequested?: () => void;
+  /** Indicates whether to set focus to the input element */
+  setFocus?: boolean;
 
   /** Use it only if you need to customize the rendering of the input.
    * @internal
    */
-  renderInputComponent?: ReactAutosuggest.RenderInputComponent<AutoSuggestData>;
+  renderInputComponent?: any; // ReactAutosuggest.RenderInputComponent<AutoSuggestData>; NOTE: changed to "any" because build was failing with RenderInputComponent is not generic?
   /** Use it if you want to customize things inside the suggestions container beyond rendering the suggestions themselves.
    * @internal
    */

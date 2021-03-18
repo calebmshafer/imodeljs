@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-// cSpell:ignore iconpicker lineweight hocs datepicker
+// cSpell:ignore iconpicker lineweight hocs datepicker quantityformat
 
 export { UiComponents } from "./ui-components/UiComponents";
 
@@ -87,6 +87,15 @@ export * from "./ui-components/properties/renderers/PropertyView";
 export * from "./ui-components/properties/renderers/ActionButtonList";
 export * from "./ui-components/properties/renderers/ActionButtonRenderer";
 
+export * from "./ui-components/quantityformat/FormatPanel";
+export * from "./ui-components/quantityformat/FormatPrecision";
+export * from "./ui-components/quantityformat/FormatSample";
+export * from "./ui-components/quantityformat/FormatType";
+export * from "./ui-components/quantityformat/FormatUnitLabel";
+export * from "./ui-components/quantityformat/FormatUnits";
+export * from "./ui-components/quantityformat/MiscFormatOptions";
+export * from "./ui-components/quantityformat/QuantityFormatPanel";
+
 export * from "./ui-components/timeline/interfaces";
 export * from "./ui-components/timeline/BaseTimelineDataProvider";
 export * from "./ui-components/timeline/ContextMenu";
@@ -140,6 +149,7 @@ export * from "./ui-components/propertygrid/internal/PropertyGridModel";
 export * from "./ui-components/propertygrid/internal/PropertyGridModelChangeEvent";
 export * from "./ui-components/propertygrid/internal/PropertyGridModelSource";
 export * from "./ui-components/propertygrid/dataproviders/FilteringDataProvider";
+export * from "./ui-components/propertygrid/dataproviders/filterers/PropertyCategoryLabelFilterer";
 export * from "./ui-components/propertygrid/dataproviders/filterers/CompositePropertyDataFilterer";
 export * from "./ui-components/propertygrid/dataproviders/filterers/DisplayValuePropertyDataFilterer";
 export * from "./ui-components/propertygrid/dataproviders/filterers/LabelPropertyDataFilterer";
@@ -153,6 +163,7 @@ export * from "./ui-components/color/ColorPickerButton";
 export * from "./ui-components/color/ColorPickerDialog";
 export * from "./ui-components/color/ColorPickerPanel";
 export * from "./ui-components/color/ColorPickerPopup";
+export * from "./ui-components/color/getCSSColorFromDef";
 
 export * from "./ui-components/iconpicker/IconPickerButton";
 
@@ -265,6 +276,10 @@ export * from "./ui-components/viewport/ViewportComponentEvents";
 /**
  * @docs-group-description PropertyGrid
  * Classes and components for working with a PropertyGrid.
+ */
+/**
+ * @docs-group-description QuantityFormat
+ * Classes and components for working with a Quantity Formats.
  */
 /**
  * @docs-group-description Table

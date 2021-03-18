@@ -29,7 +29,7 @@ export type CompressedId64Set = string;
  * @see [[OrderedId64Iterable]] for a generic representation of an ordered set of Ids (compressed or otherwise).
  * @beta
  */
-export namespace CompressedId64Set {
+export namespace CompressedId64Set { // eslint-disable-line @typescript-eslint/no-redeclare
   function isHexDigit(ch: number): boolean {
     // ascii values:
     // '0' = 48
@@ -85,6 +85,9 @@ export namespace CompressedId64Set {
    * @beta
    */
   export function compressIds(ids: OrderedId64Iterable): CompressedId64Set {
+    if ("string" === typeof ids)
+      return ids;
+
     let str = "";
 
     const prevId = new Uint64();
@@ -170,7 +173,7 @@ export namespace CompressedId64Set {
     public add(rhs: Uint64): void {
       let lower = rhs.lower;
       let upper = rhs.upper;
-      if (lower >= Uint64._base) {
+      if (lower + this.lower >= Uint64._base) {
         lower -= Uint64._base;
         upper += 1;
       }
@@ -208,7 +211,7 @@ export namespace CompressedId64Set {
    * The Ids are iterated in ascending order based on their unsigned 64-bit integer values.
    * @alpha
    */
-  export function * iterator(ids: CompressedId64Set): Iterator<Id64String> {
+  export function* iterator(ids: CompressedId64Set): Iterator<Id64String> {
     if (0 === ids.length)
       return; // empty set.
 
@@ -328,7 +331,7 @@ export namespace CompressedId64Set {
     return set;
   }
 
-  /** Decompress the compact string representation of an [[Id64Set]] into an [[Id64Array].
+  /** Decompress the compact string representation of an [[Id64Set]] into an [[Id64Array]].
    * @param compressedIds The compact string representation.
    * @param out If supplied, the Ids will be appended to this array rather than allocating and returning a new array.
    * @returns The array containing the decompressed Ids.
@@ -348,7 +351,8 @@ export namespace CompressedId64Set {
   }
 }
 
-class OrderedId64Array extends SortedArray<Id64String> {
+/** @alpha */
+export class OrderedId64Array extends SortedArray<Id64String> {
   public constructor() {
     super((lhs, rhs) => OrderedId64Iterable.compare(lhs, rhs));
   }
@@ -403,10 +407,15 @@ export class MutableCompressedId64Set implements OrderedId64Iterable {
     this._deleted.clear();
   }
 
+  /** Remove all Ids from the set, then add the specified Ids. */
+  public reset(ids?: CompressedId64Set): void {
+    this.clear();
+    this._ids = ids ?? "";
+  }
+
   /** Obtain an iterator over the Ids in this set. The Ids are returned in ascending order based on their unsigned 64-bit integer values. */
   public [Symbol.iterator]() {
-    assert(!this._isDirty);
-    return CompressedId64Set.iterator(this._ids);
+    return CompressedId64Set.iterator(this.ids);
   }
 
   /** Compute a compact string representation of the union of this and another set of Ids - i.e., those Ids present in either this and/or the other set. */

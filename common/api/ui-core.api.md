@@ -7,6 +7,8 @@
 import { ActionMeta } from 'react-select/src/types';
 import { BadgeType } from '@bentley/ui-abstract';
 import { BeUiEvent } from '@bentley/bentleyjs-core';
+import Component from 'react-select';
+import { ConditionalBooleanValue } from '@bentley/ui-abstract';
 import { ConditionalStringValue } from '@bentley/ui-abstract';
 import * as CSS from 'csstype';
 import { FocusEventHandler } from 'react-select/src/types';
@@ -26,6 +28,16 @@ import { RelativePosition } from '@bentley/ui-abstract';
 import { SelectComponentsConfig } from 'react-select/src/components/index';
 import { SliderModeFunction } from 'react-compound-slider';
 import { ValueType } from 'react-select/src/types';
+
+// @beta
+export class ActivateSettingsTabEvent extends BeUiEvent<ActivateSettingsTabEventArgs> {
+}
+
+// @beta
+export interface ActivateSettingsTabEventArgs {
+    // (undocumented)
+    readonly settingsTabId: string;
+}
 
 // @internal
 export class AnnularSector {
@@ -81,9 +93,7 @@ export class AutoSuggest extends React.PureComponent<AutoSuggestProps, AutoSugge
 
 // @beta
 export interface AutoSuggestData {
-    // (undocumented)
     label: string;
-    // (undocumented)
     value: string;
 }
 
@@ -101,7 +111,7 @@ export interface AutoSuggestProps extends React.InputHTMLAttributes<HTMLInputEle
     onSuggestionSelected: (selected: AutoSuggestData) => void;
     options?: AutoSuggestData[] | GetAutoSuggestDataFunc;
     // @internal
-    renderInputComponent?: ReactAutosuggest.RenderInputComponent<AutoSuggestData>;
+    renderInputComponent?: any;
     // @internal
     renderSuggestionsContainer?: ReactAutosuggest.RenderSuggestionsContainer;
     setFocus?: boolean;
@@ -188,6 +198,8 @@ export function Centered(props: CommonDivProps): JSX.Element;
 
 // @public
 export class Checkbox extends React.PureComponent<CheckboxProps> {
+    // @internal
+    constructor(props: CheckboxProps);
     // (undocumented)
     componentDidMount(): void;
     // @internal (undocumented)
@@ -212,6 +224,7 @@ export interface CheckBoxInfo {
 export interface CheckboxProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "type" | "onClick" | "onBlur">, CommonProps {
     indeterminate?: boolean;
     inputClassName?: string;
+    inputRef?: React.Ref<HTMLInputElement>;
     inputStyle?: React.CSSProperties;
     label?: string;
     labelClassName?: string;
@@ -267,6 +280,10 @@ export class Circle {
 // @public
 export interface ClassNameProps {
     className?: string;
+}
+
+// @internal
+export class CloseSettingsContainerEvent extends BeUiEvent<ProcessSettingsContainerCloseEventArgs> {
 }
 
 // @public
@@ -353,9 +370,10 @@ export class ContextMenuItem extends React.PureComponent<ContextMenuItemProps, C
     }
 
 // @public
-export interface ContextMenuItemProps extends React.AllHTMLAttributes<HTMLDivElement>, CommonProps {
+export interface ContextMenuItemProps extends Omit<React.AllHTMLAttributes<HTMLDivElement>, "disabled" | "hidden">, CommonProps {
     badgeType?: BadgeType;
-    disabled?: boolean;
+    disabled?: boolean | ConditionalBooleanValue;
+    hidden?: boolean | ConditionalBooleanValue;
     hideIconContainer?: boolean;
     icon?: IconSpec;
     iconRight?: IconSpec;
@@ -378,6 +396,8 @@ export interface ContextMenuProps extends CommonProps {
     edgeLimit?: boolean;
     floating?: boolean;
     hotkeySelect?: boolean;
+    // @internal (undocumented)
+    ignoreNextKeyUp?: boolean;
     onEsc?: (data: any) => any;
     onOutsideClick?: (event: MouseEvent) => any;
     onSelect?: (event: any) => any;
@@ -595,6 +615,7 @@ export const DivWithOutsideClick: {
         isDownOutside: boolean;
         componentDidMount(): void;
         componentWillUnmount(): void;
+        isInCorePopup(element: HTMLElement): boolean;
         onOutsideClick(e: MouseEvent): any;
         handleDocumentClick: (e: MouseEvent) => any;
         handleDocumentPointerDown: (e: PointerEvent) => void;
@@ -626,6 +647,7 @@ export const DivWithOutsideClick: {
         isDownOutside: boolean;
         componentDidMount(): void;
         componentWillUnmount(): void;
+        isInCorePopup(element: HTMLElement): boolean;
         onOutsideClick(e: MouseEvent): any;
         handleDocumentClick: (e: MouseEvent) => any;
         handleDocumentPointerDown: (e: PointerEvent) => void;
@@ -687,12 +709,16 @@ export interface ExpandableBlockProps extends CommonProps {
     onClick: React.MouseEventHandler<HTMLDivElement>;
     onKeyDown?: React.KeyboardEventHandler<HTMLDivElement>;
     onKeyPress?: React.KeyboardEventHandler<HTMLDivElement>;
-    title: string;
+    title: string | JSX.Element;
+    // @beta
+    tooltip?: string;
 }
 
 // @public
 export class ExpandableList extends React.PureComponent<ExpandableListProps, ExpandableListState> {
     constructor(props: ExpandableListProps);
+    // @internal (undocumented)
+    componentDidUpdate(prevProps: ExpandableListProps): void;
     // (undocumented)
     static defaultProps: Partial<ExpandableListProps>;
     // (undocumented)
@@ -804,6 +830,9 @@ export const flattenChildren: (children: React.ReactNode) => React.ReactNode;
 
 // @public
 export function FlexWrapContainer(props: CommonDivProps): JSX.Element;
+
+// @internal
+export function focusIntoContainer(focusContainer: HTMLDivElement, initialFocusElement?: React.RefObject<HTMLElement> | string): boolean;
 
 // @internal
 export function FocusTrap(props: FocusTrapProps): JSX.Element | null;
@@ -934,12 +963,13 @@ export class IconHelper {
 }
 
 // @public
-export const IconInput: React.ForwardRefExoticComponent<IconInputProps & React.RefAttributes<HTMLInputElement>>;
+export const IconInput: (props: IconInputProps) => JSX.Element | null;
 
 // @public
 export interface IconInputProps extends InputProps {
     containerClassName?: string;
     icon: React.ReactNode;
+    ref?: React.Ref<HTMLInputElement>;
 }
 
 // @public
@@ -964,13 +994,14 @@ export interface ImageCheckBoxProps extends CommonProps {
     imageOff: string | React.ReactNode;
     imageOn: string | React.ReactNode;
     inputClassName?: string;
+    inputRef?: React.Ref<HTMLInputElement>;
     inputStyle?: React.CSSProperties;
     onClick?: (checked: boolean) => any;
     tooltip?: string;
 }
 
 // @public
-export const Input: React.ForwardRefExoticComponent<InputProps & React.RefAttributes<HTMLInputElement>>;
+export const Input: (props: InputProps) => JSX.Element | null;
 
 // @public
 export class InputLabel extends React.PureComponent<InputLabelProps> {
@@ -988,6 +1019,7 @@ export interface InputLabelProps extends LabeledComponentProps, MessagedComponen
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement>, CommonProps {
     // (undocumented)
     nativeKeyHandler?: (e: KeyboardEvent) => void;
+    ref?: React.Ref<HTMLInputElement>;
     setFocus?: boolean;
 }
 
@@ -1043,7 +1075,7 @@ export interface LabeledComponentProps {
 }
 
 // @public
-export const LabeledInput: React.ForwardRefExoticComponent<LabeledInputProps & React.RefAttributes<HTMLInputElement>>;
+export function LabeledInput(props: LabeledInputProps): JSX.Element;
 
 // @public
 export interface LabeledInputProps extends InputProps, LabeledComponentProps, MessagedComponentProps {
@@ -1060,7 +1092,7 @@ export interface LabeledSelectProps extends SelectProps, LabeledComponentProps, 
 }
 
 // @public
-export const LabeledTextarea: React.ForwardRefExoticComponent<LabeledTextareaProps & React.RefAttributes<HTMLTextAreaElement>>;
+export function LabeledTextarea(props: LabeledTextareaProps): JSX.Element;
 
 // @public
 export interface LabeledTextareaProps extends TextareaProps, LabeledComponentProps, MessagedComponentProps {
@@ -1234,6 +1266,9 @@ export interface MainTabsProps extends TabsProps {
     orientation: Orientation;
 }
 
+// @internal
+export function mergeRefs<T>(...refs: ReadonlyArray<React.Ref<T>>): (instance: T | null) => void;
+
 // @public
 export class MessageBox extends React.PureComponent<MessageBoxProps> {
     // (undocumented)
@@ -1344,30 +1379,21 @@ export type NodeCheckboxRenderProps = Omit<CheckboxProps, "onChange" | "onClick"
 };
 
 // @beta
-export const NumberInput: React.ForwardRefExoticComponent<NumberInputProps & React.RefAttributes<HTMLInputElement>>;
+export const NumberInput: (props: NumberInputProps) => JSX.Element | null;
 
 // @beta
-export interface NumberInputProps extends Omit<InputProps, "min" | "max" | "step" | "onChange" | "onBlur" | "onKeyDown" | "defaultValue" | "onInvalid"> {
+export interface NumberInputProps extends Omit<InputProps, "min" | "max" | "step" | "onChange"> {
     containerClassName?: string;
-    // (undocumented)
     format?: (num: number | null | undefined, formattedValue: string) => string;
-    // (undocumented)
     max?: number;
-    // (undocumented)
     min?: number;
-    // (undocumented)
     onChange?: (value: number | undefined, stringValue: string) => void;
-    // (undocumented)
     parse?: ((value: string) => number | null | undefined);
-    // (undocumented)
     precision?: number;
-    // (undocumented)
+    ref?: React.Ref<HTMLInputElement>;
     showTouchButtons?: boolean;
-    // (undocumented)
     snap?: boolean;
-    // (undocumented)
     step?: StepFunctionProp;
-    // (undocumented)
     value?: number;
 }
 
@@ -1476,10 +1502,10 @@ export class Popup extends React.Component<PopupProps, PopupState> {
     render(): React.ReactPortal | null;
     }
 
-// @alpha
+// @beta
 export function PopupContextMenu(props: PopupContextMenuProps): JSX.Element;
 
-// @alpha
+// @beta
 export interface PopupContextMenuProps extends CommonProps {
     animate?: boolean;
     ariaLabel?: string;
@@ -1508,6 +1534,7 @@ export interface PopupProps extends CommonProps {
     ariaLabel?: string;
     closeOnContextMenu?: boolean;
     closeOnEnter?: boolean;
+    closeOnNestedPopupOutsideClick?: boolean;
     closeOnWheel?: boolean;
     focusTarget?: React.RefObject<HTMLElement> | string;
     isOpen: boolean;
@@ -1527,6 +1554,30 @@ export interface PopupProps extends CommonProps {
     showShadow: boolean;
     target?: HTMLElement | null;
     top: number;
+}
+
+// @beta
+export class ProcessSettingsContainerCloseEvent extends BeUiEvent<ProcessSettingsContainerCloseEventArgs> {
+}
+
+// @beta
+export interface ProcessSettingsContainerCloseEventArgs {
+    // (undocumented)
+    readonly closeFunc: (args: any) => void;
+    // (undocumented)
+    readonly closeFuncArgs?: any;
+}
+
+// @beta
+export class ProcessSettingsTabActivationEvent extends BeUiEvent<ProcessSettingsTabActivationEventArgs> {
+}
+
+// @beta
+export interface ProcessSettingsTabActivationEventArgs {
+    // (undocumented)
+    readonly requestedSettingsTabId: string;
+    // (undocumented)
+    readonly tabSelectionFunc: (tabId: string) => void;
 }
 
 // @beta
@@ -1817,13 +1868,21 @@ export interface SearchBoxProps extends CommonProps {
 }
 
 // @public
-export function Select(props: SelectProps): JSX.Element;
+export const Select: (props: SelectProps) => JSX.Element | null;
+
+// @public
+export interface SelectOption {
+    disabled?: boolean;
+    label: string;
+    value?: string | number | readonly string[];
+}
 
 // @public
 export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement>, CommonProps {
-    options: string[] | {
-        [key: string]: string;
+    options: (string | SelectOption)[] | {
+        [key: string]: (string | SelectOption);
     };
+    ref?: React.Ref<HTMLSelectElement>;
     setFocus?: boolean;
 }
 
@@ -1838,6 +1897,72 @@ export class SessionUiSettings implements UiSettings {
     saveSetting(settingNamespace: string, settingName: string, setting: any): Promise<UiSettingsResult>;
     // (undocumented)
     w: Window;
+}
+
+// @beta
+export const SettingsContainer: ({ tabs, onSettingsTabSelected, currentSettingsTab, settingsManager }: SettingsContainerProps) => JSX.Element;
+
+// @beta (undocumented)
+export interface SettingsContainerProps {
+    // (undocumented)
+    currentSettingsTab?: SettingsTabEntry;
+    // (undocumented)
+    onSettingsTabSelected?: (tab: SettingsTabEntry) => void;
+    // (undocumented)
+    settingsManager: SettingsManager;
+    // (undocumented)
+    tabs: SettingsTabEntry[];
+}
+
+// @beta
+export class SettingsManager {
+    activateSettingsTab(settingsTabId: string): void;
+    // (undocumented)
+    addSettingsProvider(settingsProvider: SettingsProvider): void;
+    closeSettingsContainer(closeFunc: (args: any) => void, closeFuncArgs?: any): void;
+    getSettingEntries(stageId: string, stageUsage: string): Array<SettingsTabEntry>;
+    // @internal
+    readonly onActivateSettingsTab: ActivateSettingsTabEvent;
+    // @internal
+    readonly onCloseSettingsContainer: CloseSettingsContainerEvent;
+    readonly onProcessSettingsContainerClose: ProcessSettingsContainerCloseEvent;
+    readonly onProcessSettingsTabActivation: ProcessSettingsTabActivationEvent;
+    readonly onSettingsProvidersChanged: SettingsProvidersChangedEvent;
+    // (undocumented)
+    get providers(): ReadonlyArray<SettingsProvider>;
+    set providers(p: ReadonlyArray<SettingsProvider>);
+    // (undocumented)
+    removeSettingsProvider(providerId: string): boolean;
+}
+
+// @beta
+export interface SettingsProvider {
+    // (undocumented)
+    getSettingEntries(stageId: string, stageUsage: string): ReadonlyArray<SettingsTabEntry> | undefined;
+    readonly id: string;
+}
+
+// @beta
+export class SettingsProvidersChangedEvent extends BeUiEvent<SettingsProvidersChangedEventArgs> {
+}
+
+// @beta
+export interface SettingsProvidersChangedEventArgs {
+    // (undocumented)
+    readonly providers: ReadonlyArray<SettingsProvider>;
+}
+
+// @beta
+export interface SettingsTabEntry {
+    readonly icon?: string | JSX.Element;
+    readonly isDisabled?: boolean | ConditionalBooleanValue;
+    readonly itemPriority: number;
+    readonly label: string;
+    readonly page: JSX.Element;
+    readonly pageWillHandleCloseRequest?: boolean;
+    readonly subLabel?: string;
+    readonly tabId: string;
+    readonly tooltip?: string | JSX.Element;
 }
 
 // @internal
@@ -1872,6 +1997,8 @@ export function Slider(props: SliderProps): JSX.Element;
 // @public
 export interface SliderProps extends CommonProps {
     disabled?: boolean;
+    formatMax?: (value: number) => string;
+    formatMin?: (value: number) => string;
     formatTick?: (tick: number) => string;
     formatTooltip?: (value: number) => string;
     getTickCount?: () => number;
@@ -2001,6 +2128,21 @@ export interface SvgSpriteProps extends CommonProps {
     src: string;
 }
 
+// @beta
+export interface TabLabel {
+    // (undocumented)
+    disabled?: boolean;
+    // (undocumented)
+    icon?: string | JSX.Element;
+    // (undocumented)
+    label: string;
+    // (undocumented)
+    subLabel?: string;
+    // (undocumented)
+    tabId: string;
+    tooltip?: string | JSX.Element;
+}
+
 // @public
 export class Tabs extends React.PureComponent<MainTabsProps, TabsState> {
     constructor(props: MainTabsProps);
@@ -2016,17 +2158,19 @@ export class Tabs extends React.PureComponent<MainTabsProps, TabsState> {
 export interface TabsProps extends React.AllHTMLAttributes<HTMLUListElement>, CommonProps {
     activeIndex?: number;
     green?: boolean;
-    labels: string[];
+    // @beta
+    labels: Array<string | TabLabel>;
     onActivateTab?: (index: number) => any;
     // @deprecated
     onClickLabel?: (index: number) => any;
 }
 
 // @public
-export const Textarea: React.ForwardRefExoticComponent<TextareaProps & React.RefAttributes<HTMLTextAreaElement>>;
+export const Textarea: (props: TextareaProps) => JSX.Element | null;
 
 // @public
 export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement>, CommonProps {
+    ref?: React.Ref<HTMLTextAreaElement>;
     rows?: number;
     setFocus?: boolean;
 }
@@ -2053,6 +2197,7 @@ export type ThemedSelectProps = {
     controlShouldRenderValue?: boolean;
     defaultMenuIsOpen?: boolean;
     defaultValue?: ValueType<OptionType>;
+    divRef?: React.Ref<HTMLDivElement>;
     escapeClearsValue?: boolean;
     filterOption?: ((option: OptionType, rawInput: string) => boolean) | null;
     formatGroupLabel?: typeof formatGroupLabel;
@@ -2095,6 +2240,7 @@ export type ThemedSelectProps = {
     options: OptionsType;
     pageSize?: number;
     placeholder?: string;
+    ref?: React.Ref<Component>;
     styles?: React.CSSProperties;
     tabIndex?: string;
     tabSelectsValue?: boolean;
@@ -2157,7 +2303,7 @@ export function Title(props: TextProps): JSX.Element;
 export function Title2(props: TextProps): JSX.Element;
 
 // @public
-export function Toggle(props: ToggleProps): JSX.Element;
+export const Toggle: (props: ToggleProps) => JSX.Element | null;
 
 // @public
 export enum ToggleButtonType {
@@ -2173,6 +2319,7 @@ export interface ToggleProps extends CommonProps {
     large?: boolean;
     onBlur?: (event: React.FocusEvent) => any;
     onChange?: (checked: boolean) => any;
+    ref?: React.Ref<HTMLInputElement>;
     rounded?: boolean;
     setFocus?: boolean;
     showCheckmark?: boolean;
@@ -2281,6 +2428,8 @@ export interface TreeNodeProps extends CommonProps {
     // (undocumented)
     onClickExpansionToggle?: () => void;
     // (undocumented)
+    onContextMenu?: (e: React.MouseEvent) => void;
+    // (undocumented)
     onMouseDown?: (e: React.MouseEvent) => void;
     // (undocumented)
     onMouseMove?: (e: React.MouseEvent) => void;
@@ -2343,7 +2492,7 @@ export class UiSetting<T> {
     settingNamespace: string;
 }
 
-// @beta
+// @public
 export interface UiSettings {
     // (undocumented)
     deleteSetting(settingNamespace: string, settingName: string): Promise<UiSettingsResult>;
@@ -2353,7 +2502,7 @@ export interface UiSettings {
     saveSetting(settingNamespace: string, settingName: string, setting: any): Promise<UiSettingsResult>;
 }
 
-// @beta
+// @public
 export interface UiSettingsResult {
     // (undocumented)
     setting?: any;
@@ -2361,7 +2510,7 @@ export interface UiSettingsResult {
     status: UiSettingsStatus;
 }
 
-// @beta
+// @public
 export enum UiSettingsStatus {
     // (undocumented)
     AuthorizationError = 4,
@@ -2415,6 +2564,12 @@ export function useRefState<T>(): [React.Ref<T>, T | undefined];
 // @internal
 export function useResizeObserver<T extends Element>(onResize?: (width: number, height: number) => void): (instance: T | null) => void;
 
+// @beta
+export function useSaveBeforeActivatingNewSettingsTab(settingsManager: SettingsManager, saveFunction: (tabSelectionFunc: (args: any) => void, requestedSettingsTabId?: string) => void): void;
+
+// @beta
+export function useSaveBeforeClosingSettingsContainer(settingsManager: SettingsManager, saveFunction: (closeFunc: (args: any) => void, closeFuncArgs?: any) => void): void;
+
 // @internal
 export const useTargeted: (ref: React.RefObject<Element>) => boolean;
 
@@ -2441,7 +2596,7 @@ export function WebFontIcon(props: WebFontIconProps): JSX.Element;
 export interface WebFontIconProps extends CommonProps {
     iconClassName?: string;
     iconName: string;
-    iconSize?: "small" | "medium" | "large" | "x-large";
+    iconSize?: "x-small" | "small" | "medium" | "large" | "x-large";
     onClick?: React.MouseEventHandler<HTMLSpanElement>;
     title?: string;
 }
@@ -2537,6 +2692,7 @@ export const withOnOutsideClick: <ComponentProps extends {}>(Component: React.Co
         isDownOutside: boolean;
         componentDidMount(): void;
         componentWillUnmount(): void;
+        isInCorePopup(element: HTMLElement): boolean;
         onOutsideClick(e: MouseEvent): any;
         handleDocumentClick: (e: MouseEvent) => any;
         handleDocumentPointerDown: (e: PointerEvent) => void;
@@ -2568,6 +2724,7 @@ export const withOnOutsideClick: <ComponentProps extends {}>(Component: React.Co
         isDownOutside: boolean;
         componentDidMount(): void;
         componentWillUnmount(): void;
+        isInCorePopup(element: HTMLElement): boolean;
         onOutsideClick(e: MouseEvent): any;
         handleDocumentClick: (e: MouseEvent) => any;
         handleDocumentPointerDown: (e: PointerEvent) => void;
@@ -2599,6 +2756,7 @@ export const withOnOutsideClick: <ComponentProps extends {}>(Component: React.Co
 
 // @public
 export interface WithOnOutsideClickProps {
+    closeOnNestedPopupOutsideClick?: boolean;
     onOutsideClick?: (event: MouseEvent) => any;
 }
 

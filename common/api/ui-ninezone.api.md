@@ -12,6 +12,7 @@ import { Omit } from '@bentley/ui-core';
 import { OmitChildrenProp } from '@bentley/ui-core';
 import { Point } from '@bentley/ui-core';
 import { PointProps } from '@bentley/ui-core';
+import { PopupProps } from '@bentley/ui-core';
 import * as PropTypes from 'prop-types';
 import * as React from 'react';
 import { Rectangle } from '@bentley/ui-core';
@@ -366,6 +367,9 @@ export interface DockedToolSettingsState {
 }
 
 // @internal (undocumented)
+export function dockWidgetContainer(state: NineZoneState, widgetTabId: string): NineZoneState | undefined;
+
+// @internal (undocumented)
 export const DraggedPanelSideContext: React.Context<"left" | "right" | "top" | "bottom" | undefined>;
 
 // @internal (undocumented)
@@ -622,6 +626,9 @@ export interface FloatingWidgetState {
     readonly id: WidgetState["id"];
 }
 
+// @internal (undocumented)
+export function floatWidget(state: NineZoneState, widgetTabId: string, point?: PointProps, size?: SizeProps): NineZoneState | undefined;
+
 // @beta
 export class Footer extends React.PureComponent<FooterProps> {
     // (undocumented)
@@ -657,14 +664,8 @@ export enum FooterPopupContentType {
 export type FooterPopupDefaultProps = Pick<FooterPopupProps, "contentType">;
 
 // @beta
-export interface FooterPopupProps extends CommonProps {
-    children?: React.ReactNode;
+export interface FooterPopupProps extends Partial<PopupProps> {
     contentType: FooterPopupContentType;
-    isOpen?: boolean;
-    isPinned?: boolean;
-    onClose?: () => void;
-    onOutsideClick?: (e: MouseEvent) => void;
-    target?: HTMLElement | null;
 }
 
 // @beta
@@ -953,10 +954,16 @@ export interface HorizontalPanelState extends PanelState {
 }
 
 // @internal (undocumented)
+export function isFloatingLocation(location: TabLocation): location is FloatingLocation;
+
+// @internal (undocumented)
 export const isHorizontalPanelSide: (side: PanelSide) => side is HorizontalPanelSide;
 
 // @internal (undocumented)
 export function isHorizontalPanelState(state: PanelState): state is HorizontalPanelState;
+
+// @internal (undocumented)
+export function isPanelLocation(location: TabLocation): location is PanelLocation;
 
 // @internal (undocumented)
 export function isTabTarget(target: DragTarget): target is TabTarget;
@@ -1683,8 +1690,11 @@ export const RECTANGULAR_DEFAULT_MIN_HEIGHT = 220;
 // @internal (undocumented)
 export const RECTANGULAR_DEFAULT_MIN_WIDTH = 296;
 
-// @internal (undocumented)
+// @internal
 export function removeTab(state: Draft<NineZoneState>, tabId: TabState["id"]): void;
+
+// @internal
+export function removeWidgetTab(state: Draft<NineZoneState>, tabId: TabState["id"]): void;
 
 // @internal
 export interface ResizeAction {
@@ -2902,13 +2912,21 @@ export function useLabel(labelKey: keyof NineZoneLabels): string | undefined;
 export function useMode(widgetId: string): "fit" | "fill" | "minimized";
 
 // @internal
-export function useOverflow(children: React.ReactNode, activeChildIndex?: number): [ReadonlyArray<string> | undefined, (size: number) => void, (size: number) => void, (key: string) => (size: number) => void];
+export function useOverflow(children: React.ReactNode, activeChildIndex?: number): [
+    ReadonlyArray<string> | undefined,
+    (size: number) => void,
+    (size: number) => void,
+    (key: string) => (size: number) => void
+];
 
 // @internal (undocumented)
 export function usePanelsAutoCollapse<T extends Element>(): React.Ref<T>;
 
 // @internal (undocumented)
-export function usePanelTarget<T extends Element>(args: UsePanelTargetArgs): [React.Ref<T>, boolean];
+export function usePanelTarget<T extends Element>(args: UsePanelTargetArgs): [
+    React.Ref<T>,
+    boolean
+];
 
 // @internal (undocumented)
 export interface UsePanelTargetArgs {
@@ -2938,7 +2956,10 @@ export interface UserProfileProps extends CommonProps {
 }
 
 // @internal (undocumented)
-export function useTabTarget<T extends Element>(args: UseTabTargetArgs): [React.Ref<T>, boolean];
+export function useTabTarget<T extends Element>(args: UseTabTargetArgs): [
+    React.Ref<T>,
+    boolean
+];
 
 // @internal (undocumented)
 export interface UseTabTargetArgs {
@@ -2958,7 +2979,10 @@ export function useToolSettingsEntry(): DockedToolSettingsEntryContextArgs;
 export function useTransientState(onSave?: () => void, onRestore?: () => void): void;
 
 // @internal (undocumented)
-export function useWidgetTarget<T extends Element>(args: UseWidgetTargetArgs): [React.Ref<T>, boolean];
+export function useWidgetTarget<T extends Element>(args: UseWidgetTargetArgs): [
+    React.Ref<T>,
+    boolean
+];
 
 // @internal (undocumented)
 export interface UseWidgetTargetArgs {
@@ -3137,19 +3161,8 @@ export interface WidgetOverflowProps {
     onResize?: (w: number) => void;
 }
 
-// @internal
+// @internal (undocumented)
 export const WidgetPanel: React.NamedExoticComponent<WidgetPanelProps>;
-
-// @internal (undocumented)
-export const WidgetPanelComponent: React.NamedExoticComponent<WidgetPanelComponentProps>;
-
-// @internal (undocumented)
-export interface WidgetPanelComponentProps {
-    // (undocumented)
-    spanBottom?: boolean;
-    // (undocumented)
-    spanTop?: boolean;
-}
 
 // @internal (undocumented)
 export const WidgetPanelContext: React.Context<WidgetPanelContextArgs | undefined>;
@@ -3175,14 +3188,21 @@ export function WidgetPanelExpanders(): JSX.Element;
 // @internal
 export const WidgetPanelGrip: React.NamedExoticComponent<CommonProps>;
 
-// @internal
+// @internal (undocumented)
 export interface WidgetPanelProps {
-    // (undocumented)
-    panel: PanelState;
     // (undocumented)
     spanBottom?: boolean;
     // (undocumented)
     spanTop?: boolean;
+}
+
+// @internal
+export const WidgetPanelProvider: React.NamedExoticComponent<WidgetPanelProviderProps>;
+
+// @internal
+export interface WidgetPanelProviderProps {
+    // (undocumented)
+    side: PanelSide;
 }
 
 // @internal

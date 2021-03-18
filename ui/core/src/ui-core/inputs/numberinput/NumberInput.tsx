@@ -13,7 +13,7 @@ import { Input, InputProps } from "../Input";
 import { WebFontIcon } from "../../icons/WebFontIcon";
 import { SpecialKey } from "@bentley/ui-abstract";
 
-/** Step function prototype for [[NumericInput]] component
+/** Step function prototype for [[NumberInput]] component
  * @beta
  */
 export type StepFunctionProp = number | ((direction: string) => number | undefined);
@@ -21,46 +21,46 @@ export type StepFunctionProp = number | ((direction: string) => number | undefin
 /** Properties for the [[NumberInput]] component
  * @beta
  */
-export interface NumberInputProps extends Omit<InputProps, "min" | "max" | "step" | "onChange" | "onBlur" | "onKeyDown" | "defaultValue" | "onInvalid"> {
-  // Numeric value, set to `undefined` to show placeholder text
+export interface NumberInputProps extends Omit<InputProps, "min" | "max" | "step" | "onChange"> {
+  /** Numeric value, set to `undefined` to show placeholder text */
   value?: number;
-  /** CSS class name for the NewNumericInput component container div */
+  /** CSS class name for the NumberInput component container div */
   containerClassName?: string;
-  // number or function	Number.MIN_SAFE_INTEGER
+  /** number or function	Number.MIN_SAFE_INTEGER */
   min?: number;
-  // number or function	defaults to Number.MAX_SAFE_INTEGER
+  /** number or function	defaults to Number.MAX_SAFE_INTEGER */
   max?: number;
-  // increment step value used while incrementing or decrementing (up/down buttons or arrow keys) defaults to 1.
+  /** increment step value used while incrementing or decrementing (up/down buttons or arrow keys) defaults to 1. */
   step?: StepFunctionProp;
-  // number of decimal places, defaults to 0
+  /** number of decimal places, defaults to 0 */
   precision?: number;
-  // function parseFloat
+  /** function parseFloat */
   parse?: ((value: string) => number | null | undefined);
-  // function optional formatting function that takes the number value and the internal formatted value in case function just adds prefix or suffix.
+  /** function optional formatting function that takes the number value and the internal formatted value in case function just adds prefix or suffix. */
   format?: (num: number | null | undefined, formattedValue: string) => string;
-  // Set to true to "snap" to the closest step value while incrementing or decrementing (up/down buttons or arrow keys).
+  /** Set to true to "snap" to the closest step value while incrementing or decrementing (up/down buttons or arrow keys). */
   snap?: boolean;
-  // Function to call when value is changed.
+  /** Function to call when value is changed. */
   onChange?: (value: number | undefined, stringValue: string) => void;
-  // if true up/down buttons are shown larger and side by side
+  /** if true up/down buttons are shown larger and side by side */
   showTouchButtons?: boolean;
+  /** Provides ability to return reference to HTMLInputElement */
+  ref?: React.Ref<HTMLInputElement>;
 }
 
-/** Input component with icon to the left of the input field
- * @beta
- */
-export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
-  function NewNumericInput(props, ref) {
-    const { containerClassName, value, min, max, precision, format, parse, onChange, step, snap, showTouchButtons, ...otherProps } = props;
+const ForwardRefNumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
+  function ForwardRefNumberInput(props, ref) {
+    const { containerClassName, value, min, max, precision, format, parse,
+      onChange, onBlur, onKeyDown, step, snap, showTouchButtons, ...otherProps } = props;
     const currentValueRef = React.useRef(value);
 
     /**
-     * Used internally to parse the argument x to it's numeric representation.
-     * If the argument cannot be converted to finite number returns 0; If a
-     * "precision" prop is specified uses it round the number with that
-     * precision (no fixed precision here because the return value is float, not
-     * string).
-     */
+   * Used internally to parse the argument x to it's numeric representation.
+   * If the argument cannot be converted to finite number returns 0; If a
+   * "precision" prop is specified uses it round the number with that
+   * precision (no fixed precision here because the return value is float, not
+   * string).
+   */
     const parseInternal = React.useCallback((x: string) => {
       let n: number | undefined | null;
 
@@ -84,9 +84,9 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
     }, [parse, precision, min, max]);
 
     /**
-     * This is used internally to format a number to its display representation.
-     * It will invoke the format function if one is provided.
-     */
+   * This is used internally to format a number to its display representation.
+   * It will invoke the format function if one is provided.
+   */
     const formatInternal = React.useCallback((num: number | undefined | null) => {
       const localPrecision = undefined === precision || null === precision ? 0 : precision;
       const str = undefined === num || null === num ? "" : num.toFixed(localPrecision);
@@ -123,8 +123,9 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
 
     const handleBlur = React.useCallback((event: React.FocusEvent<HTMLInputElement>) => {
       const newVal = parseInternal(event.target.value);
+      onBlur && onBlur(event);
       updateValue(newVal);
-    }, [parseInternal, updateValue]);
+    }, [parseInternal, updateValue, onBlur]);
 
     const getIncrementValue = React.useCallback((increment: boolean) => {
       if (typeof step === "function") {
@@ -136,8 +137,8 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
     }, [step]);
 
     /**
-     * The internal method that actually sets the new value on the input
-     */
+   * The internal method that actually sets the new value on the input
+   */
     const applyStep = React.useCallback((increment: boolean) => {
       const incrementValue = getIncrementValue(increment);
 
@@ -154,7 +155,7 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
     }, [formattedValue, getIncrementValue, max, min, parseInternal, snap, updateValue]);
 
     const handleKeyDown = React.useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
-      // istanbul ignore else
+    // istanbul ignore else
       if (event.key === SpecialKey.Enter) {
         updateValueFromString(event.currentTarget.value);
         event.preventDefault();
@@ -168,7 +169,8 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
         applyStep(true);
         event.preventDefault();
       }
-    }, [applyStep, formatInternal, updateValueFromString]);
+      onKeyDown && onKeyDown(event);
+    }, [applyStep, formatInternal, updateValueFromString, onKeyDown]);
 
     const handleDownClick = React.useCallback((event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
       applyStep(false);
@@ -183,7 +185,7 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
     const containerClasses = classnames("core-number-input-container", containerClassName, showTouchButtons && "core-number-buttons-for-touch");
     return (
       <div className={containerClasses} >
-        <Input value={formattedValue} ref={ref} onChange={handleChange} onKeyDown={handleKeyDown} onBlur={handleBlur} {...otherProps} />
+        <Input ref={ref} value={formattedValue} onChange={handleChange} onKeyDown={handleKeyDown} onBlur={handleBlur} {...otherProps} />
         <div className={classnames("core-number-input-buttons-container", showTouchButtons && "core-number-buttons-for-touch")}>
           { /* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
           <div className="core-number-input-button core-number-input-button-up" tabIndex={-1} onClick={handleUpClick}>
@@ -198,3 +200,8 @@ export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
     );
   }
 );
+
+/** Input component for numbers with up and down buttons to increment and decrement the value.
+ * @beta
+ */
+export const NumberInput: (props: NumberInputProps) => JSX.Element | null = ForwardRefNumberInput;

@@ -3,7 +3,6 @@ Release Tag;API Item
 beta;AliCloudStorageService 
 public;AnnotationElement2d 
 beta;AppActivityMonitor
-alpha;ApplicationType
 public;AuthorizedBackendRequestContext 
 beta;AutoPush
 beta;AutoPushEventHandler = (etype: AutoPushEventType, autoPush: AutoPush) => void
@@ -20,7 +19,6 @@ public;BackendLoggerCategory
 public;BackendRequestContext 
 public;BisCoreSchema 
 public;BriefcaseDb 
-internal;BriefcaseEntry
 public;BriefcaseId = number
 public;BriefcaseIdValue
 beta;BriefcaseManager
@@ -37,6 +35,8 @@ beta;ChangeSummaryExtractContext
 beta;ChangeSummaryExtractOptions
 beta;ChangeSummaryManager
 public;ChannelRootAspect 
+internal;CheckpointManager
+beta;CheckpointProps
 public;ClassRegistry
 beta;class CloudStorageService
 beta;CloudStorageServiceCredentials
@@ -52,6 +52,7 @@ alpha;ChannelInfo
 alpha;ChannelRootInfo 
 alpha;RepositoryChannelInfo 
 internal;StateCache
+alpha;ConcurrencyControlChannel = ConcurrencyControl.Channel
 alpha;CrashReportingConfig
 alpha;CrashReportingConfigNameValuePair
 public;DefinitionContainer 
@@ -61,7 +62,6 @@ public;DefinitionGroupGroupsDefinitions
 public;DefinitionModel 
 public;DefinitionPartition 
 public;class DefinitionSet 
-alpha;DesktopAuthorizationClient 
 public;DetailCallout 
 public;class DetailingSymbol 
 internal;DevTools
@@ -78,6 +78,9 @@ public;class Document
 internal;class DocumentCarrier 
 public;DocumentListModel 
 public;DocumentPartition 
+internal;DownloadJob
+beta;DownloadRequest
+internal;Downloads
 public;Drawing 
 public;DrawingCategory 
 public;DrawingGraphic 
@@ -115,7 +118,6 @@ public;ElevationCallout
 public;EmbeddedFileLink 
 public;Entity 
 public;EntityClassType
-internal;EventSink 
 public;ExportGraphics
 public;ExportGraphicsFunction = (info: ExportGraphicsInfo) => void
 public;ExportGraphicsInfo
@@ -199,6 +201,9 @@ public;InformationRecordModel
 public;InformationRecordPartition 
 public;class InformationReferenceElement 
 beta;InstanceChange
+beta;class IpcHandler
+beta;IpcHost
+beta;IpcHostOpts
 public;KnownLocations
 internal;LightLocation 
 public;LineStyle 
@@ -206,12 +211,13 @@ public;LineStyleDefinition
 public;class LinkElement 
 public;LinkModel 
 public;LinkPartition 
+internal;LocalhostIpcHost
 internal;MetaDataRegistry
-alpha;MobileAuthorizationClient 
 public;Model 
 public;ModelSelector 
-internal;NativeAppBackend
-public;OpenParams
+internal;class NativeAppAuthorizationBackend 
+beta;NativeHost
+beta;NativeHostOpts = IpcHostOpts
 public;OrthographicViewDefinition 
 public;class PhysicalElement 
 public;PhysicalElementAssemblesElements 
@@ -226,6 +232,8 @@ public;class PhysicalType
 public;PhysicalTypeIsOfPhysicalMaterial 
 public;PlanCallout 
 public;Platform
+internal;ProcessChangesetOptions
+beta;ProgressFunction = (loaded: number, total: number) => number
 beta;class RecipeDefinitionElement 
 public;Relationship 
 public;Relationships
@@ -234,6 +242,7 @@ public;RenderMaterialElement
 public;RenderMaterialOwnsRenderMaterials 
 public;RepositoryLink 
 public;RepositoryModel 
+beta;RequestNewBriefcaseArg = RequestNewBriefcaseProps &
 public;class RoleElement 
 public;RoleModel 
 public;Schema
@@ -272,15 +281,17 @@ public;Subject
 public;SubjectOwnsPartitionElements 
 public;SubjectOwnsSubjects 
 beta;TemplateModelCloner 
-internal;TemplateRecipe2d 
+beta;TemplateRecipe2d 
 beta;TemplateRecipe3d 
 internal;TemplateViewDefinition2d 
 internal;TemplateViewDefinition3d 
 public;TextAnnotation2d 
 public;TextAnnotation3d 
 public;Texture 
+internal;TextureCreateProps 
 public;TitleText 
 public;TxnAction
+beta;TxnElementsChanged
 public;TxnIdString = string
 beta;TxnManager
 public;class TypeDefinitionElement 
@@ -288,6 +299,8 @@ public;UpdateModelOptions
 public;UrlLink 
 internal;UsageLoggingUtilities
 internal;UsageLoggingUtilitiesOptions
+internal;V1CheckpointManager
+internal;V2CheckpointManager
 beta;ValidationError
 public;ViewAttachment 
 public;ViewAttachmentLabel 

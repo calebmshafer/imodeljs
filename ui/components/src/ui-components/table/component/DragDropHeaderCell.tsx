@@ -9,11 +9,10 @@
 import classnames from "classnames";
 import * as React from "react";
 import * as RDG from "react-data-grid";
-import { DndComponentClass } from "react-dnd";
 import { CommonProps } from "@bentley/ui-core";
 import { DragSourceArguments, DropTargetArguments } from "../../dragdrop/DragDropDef";
-import { withDragSource, WithDragSourceProps } from "../../dragdrop/withDragSource";
-import { withDropTarget, WithDropTargetProps } from "../../dragdrop/withDropTarget";
+import { withDragSource } from "../../dragdrop/withDragSource";
+import { withDropTarget } from "../../dragdrop/withDropTarget";
 import { ColumnDragLayer } from "./ColumnDragLayer";
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -26,7 +25,7 @@ export interface DragDropHeaderCellProps extends CommonProps {
 }
 
 interface HeaderWrapperProps extends CommonProps {
-  item?: DropTargetArguments;
+  item?: DropTargetArguments; // eslint-disable-line deprecation/deprecation
   type?: string;
   isDragging?: boolean;
   isOver?: boolean;
@@ -40,6 +39,7 @@ class HeaderWrapper extends React.Component<HeaderWrapperProps> {
 
     let mode = 0;
     if (item && item.clientOffset && item.initialClientOffset) {
+      // istanbul ignore next
       if (item.clientOffset.x > item.initialClientOffset.x)
         mode = 1;
       else
@@ -49,8 +49,8 @@ class HeaderWrapper extends React.Component<HeaderWrapperProps> {
     const classes = classnames(
       "components-table-header-drag-drop",
       {
-        left: canDrop && !isDragging && isOver && mode === -1,
-        right: canDrop && !isDragging && isOver && mode === 1,
+        left: canDrop && !isDragging && isOver && /* istanbul ignore next */ mode === -1,
+        right: canDrop && !isDragging && isOver && /* istanbul ignore next */ mode === 1,
         dragging: isDragging,
       },
       this.props.className,
@@ -64,15 +64,16 @@ class HeaderWrapper extends React.Component<HeaderWrapperProps> {
 }
 
 /** @internal */
-export const DragDropHeaderWrapper: DndComponentClass<HeaderWrapperProps & WithDropTargetProps<any> & WithDragSourceProps<any>> = withDragSource(withDropTarget(HeaderWrapper)); // eslint-disable-line @typescript-eslint/naming-convention
+export const DragDropHeaderWrapper = withDragSource(withDropTarget(HeaderWrapper)); // eslint-disable-line deprecation/deprecation
 
 // Used only internally in ./Table.tsx
 /** @internal */
 export class DragDropHeaderCell extends React.Component<DragDropHeaderCellProps> {
   public render(): React.ReactNode {
     const { column } = this.props;
+    /* istanbul ignore next */
     const dropTargetProps = {
-      onDropTargetDrop: (args: DropTargetArguments): DropTargetArguments => {
+      onDropTargetDrop: (args: DropTargetArguments): DropTargetArguments => { // eslint-disable-line deprecation/deprecation
         const sourceKey = args.dataObject.key || "";
         const sourceXpos = args.dataObject.xpos || 0;
         const targetKey = (column && column.key) || "";
@@ -83,22 +84,22 @@ export class DragDropHeaderCell extends React.Component<DragDropHeaderCellProps>
       objectTypes: ["Column"],
     };
     const dragSourceProps = {
-      onDragSourceBegin: (args: DragSourceArguments) => {
+      onDragSourceBegin: (args: DragSourceArguments) => { // eslint-disable-line deprecation/deprecation
         args.dataObject = {
-          key: (column && column.key) || "",
-          xpos: (column && column.left) || "",
+          key: (column && column.key) || /* istanbul ignore next */ "",
+          xpos: (column && column.left) || /* istanbul ignore next */ "",
           column,
         };
         return args;
       },
-      onDragSourceEnd: (args: DragSourceArguments) => {
+      onDragSourceEnd: (args: DragSourceArguments) => { // eslint-disable-line deprecation/deprecation
         const { sourceKey, targetKey } = args.dataObject;
         this.props.onHeaderDrop && this.props.onHeaderDrop(sourceKey, targetKey);
       },
       objectType: () => {
         return "Column";
       },
-      defaultDragLayer: ColumnDragLayer,
+      defaultDragLayer: ColumnDragLayer, // eslint-disable-line deprecation/deprecation
     };
     return (
       <DragDropHeaderWrapper

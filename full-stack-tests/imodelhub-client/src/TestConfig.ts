@@ -2,11 +2,12 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
+import * as path from "path";
 import { Config } from "@bentley/bentleyjs-core";
-import { IModelJsConfig } from "@bentley/config-loader/lib/IModelJsConfig";
+import { loadEnv } from "@bentley/config-loader";
 import { RequestGlobalOptions } from "@bentley/itwin-client";
 
-IModelJsConfig.init(true /* suppress exception */, false /* suppress error message */, Config.App);
+loadEnv(path.join(__dirname, "..", ".env"));
 // Increase the timeout since iModel creation is taking longer
 RequestGlobalOptions.timeout.response = 60 * 1000; // 60 seconds in ms
 
@@ -23,4 +24,5 @@ export class TestConfig {
   public static readonly assetName: string = Config.App.get("imjs_test_asset_name", "iModelJsAssetTest");
   public static readonly enableMocks: boolean = isOfflineSet();
   public static readonly enableIModelBank: boolean = Config.App.has("imjs_test_imodel_bank") && !!JSON.parse(Config.App.get("imjs_test_imodel_bank"));
+  public static readonly initializeiModelTimeout: number = 15 * 60 * 1000; // 15min
 }

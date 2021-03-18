@@ -20,6 +20,9 @@ export enum PresentationBackendLoggerCategory {
 
   /** The logger category used by Presentation RPC implementation. */
   Rpc = "presentation-backend.Rpc",
+
+  /** The logger category used by Presentation IPC implementation. */
+  Ipc = "presentation-backend.Ipc",
 }
 
 /**
@@ -36,6 +39,7 @@ export enum PresentationBackendNativeLoggerCategory {
 
   ECPresentation = "ECPresentation",
   ECPresentation_Connections = "ECPresentation.Connections",
+  ECPresentation_Localization = "ECPresentation.Localization",
   ECPresentation_RulesEngine = "ECPresentation.RulesEngine",
   ECPresentation_RulesEngine_Content = "ECPresentation.RulesEngine.Content",
   ECPresentation_RulesEngine_Localization = "ECPresentation.RulesEngine.Localization",

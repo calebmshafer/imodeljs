@@ -1,6 +1,134 @@
 # Change Log - @bentley/ui-core
 
-This log was last generated on Mon, 23 Nov 2020 22:19:30 GMT and should not be manually modified.
+This log was last generated on Tue, 09 Mar 2021 20:28:13 GMT and should not be manually modified.
+
+## 2.13.0
+Tue, 09 Mar 2021 20:28:13 GMT
+
+### Updates
+
+- Keep hideIconContainer prop from bleeding into div.
+- Add right mouse click on TreeNode
+- Updated to use TypeScript 4.1
+- Floating widget opacity for UI 2.0. Slider formatMin, formatMax props.
+- Support for conditionally disabling/hiding keyboard shortcuts
+- Add margin and padding top labeled-themed-select.
+- begin rename project from iModel.js to iTwin.js
+
+## 2.12.3
+Mon, 08 Mar 2021 15:32:00 GMT
+
+_Version update only_
+
+## 2.12.2
+Wed, 03 Mar 2021 18:48:53 GMT
+
+_Version update only_
+
+## 2.12.1
+Tue, 23 Feb 2021 20:54:45 GMT
+
+_Version update only_
+
+## 2.12.0
+Thu, 18 Feb 2021 22:10:13 GMT
+
+### Updates
+
+- Allow target _blank in Message boxes if secure relationships exist on the element
+- AccuDraw bi-directional value updates
+- Wrap the props.valueChanged call in the SearchBox to prevent a state change when the value has not really changed. This generally only happens when a valueChangedDelay is specified.
+
+## 2.11.2
+Thu, 18 Feb 2021 02:50:59 GMT
+
+_Version update only_
+
+## 2.11.1
+Thu, 04 Feb 2021 17:22:41 GMT
+
+_Version update only_
+
+## 2.11.0
+Thu, 28 Jan 2021 13:39:27 GMT
+
+### Updates
+
+- Update components that support providing refs via React.forwardRef to work better with document generation.
+- Add option to use a 'x-small' webfont icon.
+- Add nested popup support to components that use HOC withOnOutsideClick.
+- Fix bug processing zero value in Select options.
+- Fix calling of onClick and onSelect calls when ContextMenuItem is disabled
+- Lock react-select to 3.1.0 and @types/react-select to 3.0.26 until we can fi
+- updated `ExpandableBlock` component to be able to take in title as JSX.Element and a tooltip, in which title string property can be passed
+- updated `ExpandableBlock` component to be able to take in title as JSX.Element and a tooltip, in which title string property can be passed
+- Add partial checkbox handling to TreeNode
+- Initial implementation of AccuDraw UI
+- Added ui-core learning docs content and added Notification.md, Style.md & Tooltip.md ui-core learning doc files.
+- Added support to ExpandableList for updating the active block programmatically
+- Fix controlled/uncontrolled react warning in Select component.
+- Added disabled support to Select component options
+
+## 2.10.3
+Fri, 08 Jan 2021 18:34:03 GMT
+
+_Version update only_
+
+## 2.10.2
+Fri, 08 Jan 2021 14:52:02 GMT
+
+_Version update only_
+
+## 2.10.1
+Tue, 22 Dec 2020 00:53:38 GMT
+
+_Version update only_
+
+## 2.10.0
+Fri, 18 Dec 2020 18:24:01 GMT
+
+### Updates
+
+- By default format slider tooltip with same number of decimal places as step specification.
+- Change warning/success/error colors for labeledInput to themed variables .
+- Add ability for Popup to avoid outside click processing when clicking on element in nested Popup.
+- Add new NumberInput control to replace NumericInput which wrapped react-numeric-input.
+- Clear FocusTrap timeout on unmount.
+- Popup - added onContextMenu & closeOnContextMenu props
+- Added 'closeOnWheel' and 'onWheel' Popup props
+- Unified UI typography systems
+
+## 2.9.9
+Sun, 13 Dec 2020 19:00:03 GMT
+
+_Version update only_
+
+## 2.9.8
+Fri, 11 Dec 2020 02:57:36 GMT
+
+_Version update only_
+
+## 2.9.7
+Wed, 09 Dec 2020 20:58:23 GMT
+
+_Version update only_
+
+## 2.9.6
+Mon, 07 Dec 2020 18:40:48 GMT
+
+_Version update only_
+
+## 2.9.5
+Sat, 05 Dec 2020 01:55:56 GMT
+
+_Version update only_
+
+## 2.9.4
+Wed, 02 Dec 2020 20:55:40 GMT
+
+### Updates
+
+- Clear FocusTrap timeout on unmount.
 
 ## 2.9.3
 Mon, 23 Nov 2020 20:57:56 GMT
@@ -197,7 +325,7 @@ Tue, 28 Jul 2020 16:26:24 GMT
 - Add support for a basic single selection aria compliant listbox.
 - Checkboxes in lists & trees are out of place
 - Disabled component styling. Fixed Dialog focus problems.
-- Map Layer UX 
+- Map Layer UX
 - Allowing Input component user to override the type
 - Fix ThemeSelect formatOptionLabel prop to return React.ReactNode.
 - Added Arrow key navigation in Tabs components. Added ItemKeyboardNavigator.
@@ -520,7 +648,7 @@ Mon, 13 May 2019 15:52:05 GMT
 - Put sourcemap in npm package.
 - Added SignIn presentational component to ui-components. Removed --ignoreMissingTags extract-api option.
 - Require React & React-dom 16.8
-- Setup a generic context for tracking client requests, and made various related enhancements to logging, usage tracking and authorization. 
+- Setup a generic context for tracking client requests, and made various related enhancements to logging, usage tracking and authorization.
 - Added ViewportDialog in ui-test-app, ui-core/ContributeGuidelines.md. TSLint rules in ui-core for no-default-export & completed-docs. @beta release tags.
 - Update icons-generic-webfont version to latest available.
 - Added TableProp to hide header and supporting style changes
